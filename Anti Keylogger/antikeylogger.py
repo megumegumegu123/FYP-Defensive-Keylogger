@@ -1,32 +1,37 @@
-from fileinput import filename
-from subprocess import Popen, PIPE
 import subprocess
 import sys
 import os
 import signal
 import vt
+import shutil
 import time
 import hashlib
 import fileinput
 import requests
 import argparse
+import getopt
+import psutil
+from os.path import exists
+from fileinput import filename
+from subprocess import Popen, PIPE
 from subprocess import call
 from prettytable import PrettyTable
 from datetime import datetime
-import psutil
 from win32com.client import GetObject
 from sys import stdout
 #Virustotal API key (Stay Hidden)
-#client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
-client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
+client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
+#client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
 
 #Names of software which should be removed
 ###Add a box which shows the blacklist and allow to add
-blacklist = ['keylogger']
+blacklistNames = ['keylogger']
+blacklisted_software = []
+whitelisted_software = []
 
 #Menu
 def option():
-    choice = input("1. Kill process || 2. Scan file signature || 3. Scan file digital signature || 4. Process Monitor ")
+    choice = input("1. Kill process || 2. Scan file signature || 3. Scan file digital signature || 4. Process Monitor || 5. Monitor SMTP Ports ")
     choice = int(choice)
     if(choice == 1):
         retrieveProcessList()
@@ -36,6 +41,8 @@ def option():
         scan_signature()
     if(choice == 4):
         procMon()
+    if(choice == 5):
+        portMonitor()
 
 #Process class to retrieve process name and process PID
 class Process(object):
@@ -75,7 +82,7 @@ def retrieveProcessList():
     #Loop through processList to look at each process
     for process in processList:
         #Loop through blacklisted terms and see if it matches the process
-        for blacklisted in blacklist:
+        for blacklisted in blacklistNames:
             #Upper so that processes with capital and small letters are matched evenly
             if(process.name.upper().find(blacklisted.upper()) > -1):
                 print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
@@ -227,6 +234,78 @@ def procMon():
 
         # Create a 1 second delay
         time.sleep(1)
+
+###GUI Showing blacklisted_software + whitelisted_software and detected ports and software
+#Monitors SMTP ports for any activities
+def portMonitor():
+    
+    time = 1
+    while True:
+        if time == 1:
+            print("\nScanning in progress...")
+        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True, stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE)
+        out, err = proc.communicate()
+        output = out.decode()
+        my_list = output.split(" ")
+        # PID will be the last number once split
+        pid = my_list[-1]
+        # obtain output from checking the application name of PID
+        cmd_output = subprocess.getoutput(f'tasklist /fi "pid eq {pid}"')
+        # to make finding process name easier, split cmd_output
+        process_name = cmd_output.split()
+        time += 1
+        if "ESTABLISHED" in output:
+            # delete empty array elements
+            my_list = list(filter(None, my_list))
+            # get the full IP address with port number from the last element from output
+            port_num = my_list[-3]
+            # split at the ':' to get port number at last index of array
+            get_port = port_num.split(":")
+            port = get_port[-1]
+
+            # debugging
+            # print(my_list)
+            # print(pid)
+            # print(process_name)
+
+            # 13th element in process_name will always be application name
+            process_name = process_name[13]
+            p = psutil.Process(int(pid))
+
+            if process_name not in whitelisted_software:
+                print("KEYLOGGER DETECTED!")
+
+                # terminate process if it exists in blacklist
+                if process_name in blacklisted_software:
+                    p.kill()
+                    print("Blacklist application found running.\nProcess automatically terminated.")
+                    time = 1
+                # if process is not in whitelist, check if it should be
+                elif process_name not in whitelisted_software:
+                    print("Pausing application...\n")
+                    p.suspend()
+                    print("Information on application identified in your system to be potential threat...")
+                    print(f'Application name: {process_name}\n'
+                          f'Process ID (PID): {pid}'
+                          f'Trying to communicate on port {port}\n')
+                    selected = False
+                    while not selected:
+                        is_safe = input("Would you like to whitelist this application? (Y/N): ").lower()
+                        if is_safe == 'n':
+                            print("Terminating process...")
+                            p.kill()
+                            print("Adding to blacklist...")
+                            blacklisted_software.append(process_name)
+                            selected = True
+                            time = 1
+                        elif is_safe == 'y':
+                            print("Resuming process...")
+                            p.resume()
+                            print("Adding to whitelist...")
+                            whitelisted_software.append(process_name)
+                            selected = True
+                            time = 1
 
 #Start
 if __name__ == '__main__':
