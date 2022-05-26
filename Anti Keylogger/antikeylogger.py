@@ -20,14 +20,16 @@ client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc82046
 ###Add a box which shows the blacklist and allow to add
 blacklist = ['keylogger']
 
+#Menu
 def option():
-    choice = input("1. Kill process || 2. Scan file signature ")
+    choice = input("1. Kill process || 2. Scan file signature || 3. Scan file digital signature ")
     choice = int(choice)
     if(choice == 1):
         retrieveProcessList()
     if(choice == 2):
         scan_file()
-
+    if(choice == 3):
+        scan_signature()
 
 #Process class to retrieve process name and process PID
 class Process(object):
@@ -119,7 +121,39 @@ def scan_file():
     except FileNotFoundError:
         print("Please input a valid file")
         scan_file()
-        
+
+#Function to convert file to SHA1
+def convertToHash(file):
+   #make a hash object
+   h = hashlib.sha1()
+   #open file for reading in binary mode
+   with open(file,'rb') as f:
+       #loop till the end of the file
+       chunk = 0
+       while chunk != b'':
+           #read only 1024 bytes at a time
+           chunk = f.read(1024)
+           h.update(chunk)
+   #return the hex representation of digest
+   return h.hexdigest()
+
+#Function to scan digital signature of file
+def scan_signature():
+    fileInput = input("File: ")
+    try:
+        hash = convertToHash(fileInput)
+        #Debug
+        #print(hash)
+        #Send request to API
+        file = client.get_object(f'/files/{hash}')
+        #Find number of malicious detections
+        numberOfMaliciousDetections = file.last_analysis_stats['malicious']
+        #Run remove_file function
+        remove_file(numberOfMaliciousDetections, fileInput)
+    except FileNotFoundError:
+        print("Please input a valid file")
+        scan_signature()
+
 #Function to delete file
 def remove_file(num, fileInput):
     #If >0 then remove file
