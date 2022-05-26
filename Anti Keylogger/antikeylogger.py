@@ -1,6 +1,8 @@
 from subprocess import Popen, PIPE
 import os
 import signal
+import vt
+import time
 from sys import stdout
 
 ##Names of software which should be removed
@@ -53,6 +55,14 @@ def retrieveProcessList():
     if keyloggerDetected == 0:
         print("No keylogger was detected.")
     exit()
+
+##Virustotal API key
+client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
+##Need to implement file input here
+file = client.get_object("xx")
+##Need to implement button to run this code
+with open("logfile", "rb") as f:
+    analysis = client.scan_file(file, wait_for_completion=True)
 
 ##Start
 if __name__ == '__main__':
