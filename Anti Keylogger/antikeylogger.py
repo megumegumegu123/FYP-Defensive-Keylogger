@@ -10,6 +10,10 @@ import hashlib
 import fileinput
 import requests
 import argparse
+from subprocess import call
+from prettytable import PrettyTable
+from datetime import datetime
+import psutil
 from win32com.client import GetObject
 from sys import stdout
 #Virustotal API key (Stay Hidden)
@@ -22,7 +26,7 @@ blacklist = ['keylogger']
 
 #Menu
 def option():
-    choice = input("1. Kill process || 2. Scan file signature || 3. Scan file digital signature ")
+    choice = input("1. Kill process || 2. Scan file signature || 3. Scan file digital signature || 4. Process Monitor ")
     choice = int(choice)
     if(choice == 1):
         retrieveProcessList()
@@ -30,6 +34,8 @@ def option():
         scan_file()
     if(choice == 3):
         scan_signature()
+    if(choice == 4):
+        procMon()
 
 #Process class to retrieve process name and process PID
 class Process(object):
@@ -44,6 +50,7 @@ def removeKeylogger(pid):
     os.kill(int(pid), 9)
 
 ###Button here to run this function
+#Function to retrieve processes
 def retrieveProcessList():
     processList = []
     keyloggerDetected = 0
@@ -98,6 +105,7 @@ def Process_path(pid):
             return p.Properties_[7].Value               
     return "no such process"       
 
+###Button
 #Scan file if it is malicious or not
 def scan_file():
     fileInput = input("File: ")
@@ -137,6 +145,7 @@ def convertToHash(file):
    #return the hex representation of digest
    return h.hexdigest()
 
+###Button
 #Function to scan digital signature of file
 def scan_signature():
     fileInput = input("File: ")
@@ -162,6 +171,62 @@ def remove_file(num, fileInput):
         print("File has been deleted! :D")
     else:
         print("File is not malicious! :D")
+
+###GUI Auto Update Page
+def procMon():
+    #https://www.geeksforgeeks.org/how-to-make-a-process-monitor-in-python/
+    # Run an infinite loop to constantly monitor the system
+    while True:
+        # Clear the screen using a bash command
+        os.system('cls')
+        print("==============================Process Monitor\
+        ======================================")
+    
+        # Fetch the Network information
+        print("----Networks----")
+        table = PrettyTable(['Network', 'Status', 'Speed'])
+        for key in psutil.net_if_stats().keys():
+            name = key
+            up = "Up" if psutil.net_if_stats()[key].isup else "Down"
+            speed = psutil.net_if_stats()[key].speed
+            table.add_row([name, up, speed])
+        print(table)
+    
+        # Fetch the memory information
+        print("----Memory----")
+        memory_table = PrettyTable(["Total", "Used",
+                                    "Available", "Percentage"])
+        vm = psutil.virtual_memory()
+        memory_table.add_row([
+            vm.total,
+            vm.used,
+            vm.available,
+            vm.percent
+        ])
+        print(memory_table)
+        
+        # Fetch the last 10 processes from available processes
+        print("----Processes----")
+        process_table = PrettyTable(['PID', 'PNAME', 'STATUS',
+                                    'CPU', 'NUM THREADS'])
+        for process in psutil.pids()[-10:]:
+            # While fetching the processes, some of the subprocesses may exit
+            # Hence we need to put this code in try-except block
+            try:
+                p = psutil.Process(process)
+                process_table.add_row([
+                    str(process),
+                    p.name(),
+                    p.status(),
+                    str(p.cpu_percent())+"%",
+                    p.num_threads()
+                    ])
+            except Exception as e:
+                pass
+        print(process_table)
+
+        # Create a 1 second delay
+        time.sleep(1)
 
 #Start
 if __name__ == '__main__':
