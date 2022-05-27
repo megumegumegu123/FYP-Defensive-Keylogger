@@ -11,6 +11,10 @@ import requests
 import argparse
 import getopt
 import psutil
+import tkinter as tk
+from tkinter import *
+from tkinter import filedialog
+from tkinter import Grid
 from os.path import exists
 from fileinput import filename
 from subprocess import Popen, PIPE
@@ -115,7 +119,8 @@ def Process_path(pid):
 ###Button
 #Scan file if it is malicious or not
 def scan_file():
-    fileInput = input("File: ")
+    #Ask for filename
+    fileInput = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
     #try except to catch FileNotFoundError
     try:
         with open(fileInput,'rb') as f:
@@ -135,7 +140,7 @@ def scan_file():
             remove_file(numberOfMaliciousDetections, fileInput)
     except FileNotFoundError:
         print("Please input a valid file")
-        scan_file()
+        pass
 
 #Function to convert file to SHA1
 def convertToHash(file):
@@ -152,10 +157,10 @@ def convertToHash(file):
    #return the hex representation of digest
    return h.hexdigest()
 
-###Button
 #Function to scan digital signature of file
 def scan_signature():
-    fileInput = input("File: ")
+    #Ask for filename
+    fileInput = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
     try:
         hash = convertToHash(fileInput)
         #Debug
@@ -168,7 +173,7 @@ def scan_signature():
         remove_file(numberOfMaliciousDetections, fileInput)
     except FileNotFoundError:
         print("Please input a valid file")
-        scan_signature()
+        pass
 
 #Function to delete file
 def remove_file(num, fileInput):
@@ -306,6 +311,15 @@ def portMonitor():
                             whitelisted_software.append(process_name)
                             selected = True
                             time = 1
+
+#Main GUI
+root = tk.Tk()
+root.title('Anti Keylogger')
+root.geometry('700x500')
+btnRetrieveProcesses = tk.Button(root, text = "Retrieve Processes", command=retrieveProcessList).place(x=100,y=450)
+btnScanFile = tk.Button(root, text = "Scan File", command=scan_file).place(x=300,y=450)
+btnScanSignature = tk.Button(root, text = "Scan File Signature", command=scan_signature).place(x=500,y=450)
+root.mainloop()
 
 #Start
 if __name__ == '__main__':
