@@ -126,7 +126,7 @@ def scan_file():
         with open(fileInput,'rb') as f:
             #Scan file
             analysis = client.scan_file(f)
-            print("Scanning")
+            print("Scanning...")
             #Keep looping until analysis is completed
             while True:
                 analysis = client.get_object("/analyses/{}", analysis.id)
@@ -181,8 +181,10 @@ def remove_file(num, fileInput):
     if(num)>0:
         os.remove(fileInput)
         print("File has been deleted! :D")
+        client.close()
     else:
         print("File is not malicious! :D")
+        client.close()
 
 ###GUI Auto Update Page
 def procMon():
