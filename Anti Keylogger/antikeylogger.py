@@ -2,6 +2,7 @@ import subprocess
 import sys
 import os
 import signal
+from tkinter.messagebox import showinfo
 import vt
 import shutil
 import time
@@ -24,8 +25,8 @@ from datetime import datetime
 from win32com.client import GetObject
 from sys import stdout
 #Virustotal API key (Stay Hidden)
-#client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
-client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
+client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
+# client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
 
 #Names of software which should be removed
 ###Add a box which shows the blacklist and allow to add
@@ -181,9 +182,11 @@ def remove_file(num, fileInput):
     if(num)>0:
         os.remove(fileInput)
         print("File has been deleted! :D")
+        showinfo (title="Results", message="File is malicious and has been removed!")
         client.close()
     else:
         print("File is not malicious! :D")
+        showinfo (title="Results", message="File is not malicious.")
         client.close()
 
 ###GUI Auto Update Page
