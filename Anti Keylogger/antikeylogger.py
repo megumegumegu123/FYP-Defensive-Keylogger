@@ -140,7 +140,12 @@ def scan_file():
             #Run remove_file function
             remove_file(numberOfMaliciousDetections, fileInput)
     except FileNotFoundError:
+        
         print("Please input a valid file")
+        showinfo(
+            title="Error!" ,
+            message="Please input a valid file"
+        )
         pass
 
 #Function to convert file to SHA1
@@ -194,23 +199,25 @@ def procMon():
     #https://www.geeksforgeeks.org/how-to-make-a-process-monitor-in-python/
     # Run an infinite loop to constantly monitor the system
     while True:
+        # Creating a table for the entire thing
+        endTable = ""
         # Clear the screen using a bash command
         os.system('cls')
-        print("==============================Process Monitor\
-        ======================================")
-    
+        endTable += "==============================        Process Monitor\
+        ======================================\n"
+
         # Fetch the Network information
-        print("----Networks----")
-        table = PrettyTable(['Network', 'Status', 'Speed'])
+        endTable += "----Networks----\n"
+        network_table = PrettyTable(['Network', 'Status', 'Speed'])
         for key in psutil.net_if_stats().keys():
             name = key
             up = "Up" if psutil.net_if_stats()[key].isup else "Down"
             speed = psutil.net_if_stats()[key].speed
-            table.add_row([name, up, speed])
-        print(table)
+            network_table.add_row([name, up, speed])
+        endTable += str(network_table) + "\n"
     
         # Fetch the memory information
-        print("----Memory----")
+        endTable += "----Memory----\n"
         memory_table = PrettyTable(["Total", "Used",
                                     "Available", "Percentage"])
         vm = psutil.virtual_memory()
@@ -220,10 +227,10 @@ def procMon():
             vm.available,
             vm.percent
         ])
-        print(memory_table)
-        
+        endTable += str(memory_table) + "\n"
+
         # Fetch the last 10 processes from available processes
-        print("----Processes----")
+        endTable += "----Processes----\n"
         process_table = PrettyTable(['PID', 'PNAME', 'STATUS',
                                     'CPU', 'NUM THREADS'])
         for process in psutil.pids()[-10:]:
@@ -240,10 +247,50 @@ def procMon():
                     ])
             except Exception as e:
                 pass
-        print(process_table)
 
-        # Create a 1 second delay
-        time.sleep(1)
+        endTable += str(process_table) + "\n"
+        return endTable
+
+# Creating the Window to show the table in the GUI
+def procMonWin():
+            # Setting the variable to get value from function procMon
+            table = procMon()
+            #To allow the table to seen in the console
+            print(table)
+            # Creating the new window
+            procMonWin = Toplevel(root)
+            procMonWin.title("Process Monitor")
+            procMonWin.geometry('700x600')
+            # Changing the table var to a var that tkinter accpet
+            procMonTableString = StringVar()
+            procMonTableString.set(table)
+            # Adding the table to the window
+            procMonTable = Label(procMonWin, textvariable= procMonTableString)
+            procMonTable.pack()
+            procMonTable.place(x=0,y=0)
+            # Preventing interaction with the Main GUI when procMon is running
+            procMonWin.grab_set()
+            # Function to close the procMon Window
+            def exitWin():
+                procMonWin.destroy()
+            # Function to update the table on the procMon Winodw
+            def updateTable():
+                table = procMon()
+                procMonTableString.set(table)
+                print(table)
+                print("Update")
+                procMonTable['textvariable']= procMonTableString
+                procMonWin.after(1000, updateTable)
+            # A button to exit the window
+            exitBtn = Button(procMonWin, text="Exit" ,command=exitWin)    
+            exitBtn.pack()
+            exitBtn.place(x=450,y=550)    
+            # Start updating the table    
+            updateTable()
+            
+            
+
+        
 
 ###GUI Showing blacklisted_software + whitelisted_software and detected ports and software
 #Monitors SMTP ports for any activities
@@ -321,7 +368,8 @@ def portMonitor():
 root = tk.Tk()
 root.title('Anti Keylogger')
 root.geometry('700x500')
-btnRetrieveProcesses = tk.Button(root, text = "Retrieve Processes", command=retrieveProcessList).place(x=100,y=450)
-btnScanFile = tk.Button(root, text = "Scan File", command=scan_file).place(x=300,y=450)
-btnScanSignature = tk.Button(root, text = "Scan File Signature", command=scan_signature).place(x=500,y=450)
+btnRetrieveProcesses = tk.Button(root, text = "Retrieve Processes", command=retrieveProcessList).place(x=50,y=450)
+btnScanFile = tk.Button(root, text = "Scan File", command=scan_file).place(x=200,y=450)
+btnScanSignature = tk.Button(root, text = "Scan File Signature", command=scan_signature).place(x=325,y=450)
+btnProcMon = tk.Button(root, text = "Process Monitor", command=procMonWin).place(x=500,y=450)
 root.mainloop()
