@@ -1,8 +1,9 @@
+from cgitb import text
 import subprocess
 import sys
 import os
 import signal
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import askquestion, showerror, showinfo
 import vt
 import shutil
 import time
@@ -25,14 +26,14 @@ from datetime import datetime
 from win32com.client import GetObject
 from sys import stdout
 #Virustotal API key (Stay Hidden)
-client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
-# client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
+# client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
+client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
 
 #Names of software which should be removed
 ###Add a box which shows the blacklist and allow to add
 blacklistNames = ['keylogger']
-blacklisted_software = []
-whitelisted_software = []
+blacklisted_software = ['keylogger']
+whitelisted_software = ['spotify']
 
 #Menu
 def option():
@@ -90,23 +91,30 @@ def retrieveProcessList():
         for blacklisted in blacklistNames:
             #Upper so that processes with capital and small letters are matched evenly
             if(process.name.upper().find(blacklisted.upper()) > -1):
-                print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
-                option = input("Delete File? (Y/N)")
-                if (option == "Y" or option == "y"):
+                keyloggerDetected += 1
+                
+                option=askquestion(root,'Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid + '\nDo you want to delete the file?\n(NO will result in ending the process.)')
+                # print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
+                # option = input("Delete File? (Y/N)")
+                if (option == "yes"):
                     #Find file path
                     print(f'The location of the file is: {Process_path(int(process.pid))}')
                     #Delete file at that file path
                     try:    
                         os.remove(Process_path(int(process.pid)))
+                        showinfo(root,'Deleted ' + process.name)
                     except FileNotFoundError:
                         print("Error finding file")
+                        showerror(root,'There is some error deleting the file, recommending manual deletion after ending the process.')
                     keyloggerDetected += 1
-                elif (option == "N" or option == "n"):  
+                elif (option == "no"):  
                     #Remove process
                     removeKeylogger(process.pid)
+                    showinfo(root,'Keylogger killed')
                     keyloggerDetected += 1
     if keyloggerDetected == 0:
         print("No keylogger was detected.")
+        showinfo(root, message="No keylogger was detected.")
 
 #Retrieve process path
 def Process_path(pid):
@@ -123,6 +131,18 @@ def scan_file():
     #Ask for filename
     fileInput = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
     #try except to catch FileNotFoundError
+    scanningWin = Toplevel(root)
+    scanningWin.title("Scanning...")
+    scanningWin.geometry("200x100")
+    scanningLabel = Label (scanningWin, text="Scanning in Progress")
+    scanningLabel.pack()
+    scanningLabel.place(x=100,y=50)
+    def exitWin():
+        scanningWin.destroy()
+        return
+    exitBtn = Button(scanningWin, text="Exit" ,command=exitWin)
+    exitBtn.pack()
+    exitBtn.place(x=190,y=90)
     try:
         with open(fileInput,'rb') as f:
             #Scan file
@@ -132,8 +152,10 @@ def scan_file():
             while True:
                 analysis = client.get_object("/analyses/{}", analysis.id)
                 print(analysis.status)
+
                 #End loop when analysis is completed
                 if analysis.status == "completed":
+                    scanningWin.destroy()
                     break
             #Find number of malicious detections
             numberOfMaliciousDetections = analysis.stats['malicious']
@@ -142,7 +164,7 @@ def scan_file():
     except FileNotFoundError:
         
         print("Please input a valid file")
-        showinfo(
+        showerror(
             title="Error!" ,
             message="Please input a valid file"
         )
@@ -179,6 +201,10 @@ def scan_signature():
         remove_file(numberOfMaliciousDetections, fileInput)
     except FileNotFoundError:
         print("Please input a valid file")
+        showerror(
+            title="Error!" ,
+            message="Please input a valid file"
+        )
         pass
 
 #Function to delete file
@@ -287,19 +313,45 @@ def procMonWin():
             exitBtn.place(x=450,y=550)    
             # Start updating the table    
             updateTable()
-            
-            
+             
+def portMonWin():
+    portMonWin = Toplevel(root)
+    portMonWin.title("Port Monitor")
+    portMonWin.geometry("500x300")
+    portMonWin.grab_set()
+    whiteListString = StringVar()
+    for software in whitelisted_software:
+        whiteList = 'Whitelisted Softwares: ' + str(software)
+    whiteListString.set(whiteList)
+    blackListString = StringVar()
+    for software in blacklisted_software:
+        blackList = 'Blacklisted Softwares: ' + str(software)
+    blackListString.set(blackList)
+    whiteListLabel = Label(portMonWin, text="Whitelisted Softwares:", textvariable=whiteListString)
+    whiteListLabel.pack()
+    whiteListLabel.place(x=0,y=0)
+    blackListLabel = Label(portMonWin, textvariable=blackListString)
+    blackListLabel.pack()
+    blackListLabel.place(x=0,y=100)
+    def exitWin():
+        portMonWin.destroy()
+    exitBtn = Button(portMonWin, text="Exit" ,command=exitWin)    
+    exitBtn.pack()
+    exitBtn.place(x=450,y=250)
+    scanningLabel = Label(portMonWin, text= "Scanning...")
+    scanningLabel.pack()
+    scanningLabel.place(x=200,y=250)
 
-        
 
 ###GUI Showing blacklisted_software + whitelisted_software and detected ports and software
 #Monitors SMTP ports for any activities
 def portMonitor():
-    
+    portMonWin()
     time = 1
     while True:
         if time == 1:
             print("\nScanning in progress...")
+            
         proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True, stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
@@ -364,12 +416,16 @@ def portMonitor():
                             selected = True
                             time = 1
 
+
+    
+
 #Main GUI
 root = tk.Tk()
 root.title('Anti Keylogger')
 root.geometry('700x500')
 btnRetrieveProcesses = tk.Button(root, text = "Retrieve Processes", command=retrieveProcessList).place(x=50,y=450)
 btnScanFile = tk.Button(root, text = "Scan File", command=scan_file).place(x=200,y=450)
-btnScanSignature = tk.Button(root, text = "Scan File Signature", command=scan_signature).place(x=325,y=450)
-btnProcMon = tk.Button(root, text = "Process Monitor", command=procMonWin).place(x=500,y=450)
+btnScanSignature = tk.Button(root, text = "Scan File Signature", command=scan_signature).place(x=300,y=450)
+btnProcMon = tk.Button(root, text = "Process Monitor", command=procMonWin).place(x=450,y=450)
+btnPortMon = tk.Button(root, text = "Port Monitor", command=portMonitor).place(x=600,y=450)
 root.mainloop()
