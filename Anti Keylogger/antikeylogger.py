@@ -25,6 +25,7 @@ from prettytable import PrettyTable
 from datetime import datetime
 from win32com.client import GetObject
 from sys import stdout
+from threading import *
 #Virustotal API key (Stay Hidden)
 # client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
 client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
@@ -35,20 +36,7 @@ blacklistNames = ['keylogger']
 blacklisted_software = ['keylogger']
 whitelisted_software = ['spotify']
 
-#Menu
-def option():
-    choice = input("1. Kill process || 2. Scan file signature || 3. Scan file digital signature || 4. Process Monitor || 5. Monitor SMTP Ports ")
-    choice = int(choice)
-    if(choice == 1):
-        retrieveProcessList()
-    if(choice == 2):
-        scan_file()
-    if(choice == 3):
-        scan_signature()
-    if(choice == 4):
-        procMon()
-    if(choice == 5):
-        portMonitor()
+
 
 #Process class to retrieve process name and process PID
 class Process(object):
@@ -125,26 +113,32 @@ def Process_path(pid):
             return p.Properties_[7].Value               
     return "no such process"       
 
+
+def scanFileWin():
+    showinfo(root, message="Remember this process cannot be stopped!")
+    global fileInputSF
+    fileInputSF = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
+    scanFileThread = Thread(target=scan_file)
+    scanFileThread.start()
+    global scanningWin
+    scanningWin = Toplevel(root)
+    scanningWin.title("Scan File")
+    scanningWin.geometry("300x300")
+    scanningLabel = Label (scanningWin, text="Scanning in Progress")
+    scanningLabel.pack()
+    scanningLabel.place(x=100,y=50)
+    def disable_event():
+        pass    
+    scanningWin.wm_protocol("WM_DELETE_WINDOW", disable_event)
+
 ###Button
 #Scan file if it is malicious or not
 def scan_file():
     #Ask for filename
-    fileInput = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
+    # fileInput = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
     #try except to catch FileNotFoundError
-    scanningWin = Toplevel(root)
-    scanningWin.title("Scanning...")
-    scanningWin.geometry("200x100")
-    scanningLabel = Label (scanningWin, text="Scanning in Progress")
-    scanningLabel.pack()
-    scanningLabel.place(x=100,y=50)
-    def exitWin():
-        scanningWin.destroy()
-        return
-    exitBtn = Button(scanningWin, text="Exit" ,command=exitWin)
-    exitBtn.pack()
-    exitBtn.place(x=190,y=90)
     try:
-        with open(fileInput,'rb') as f:
+        with open(fileInputSF,'rb') as f:
             #Scan file
             analysis = client.scan_file(f)
             print("Scanning...")
@@ -152,7 +146,6 @@ def scan_file():
             while True:
                 analysis = client.get_object("/analyses/{}", analysis.id)
                 print(analysis.status)
-
                 #End loop when analysis is completed
                 if analysis.status == "completed":
                     scanningWin.destroy()
@@ -160,7 +153,7 @@ def scan_file():
             #Find number of malicious detections
             numberOfMaliciousDetections = analysis.stats['malicious']
             #Run remove_file function
-            remove_file(numberOfMaliciousDetections, fileInput)
+            remove_file(numberOfMaliciousDetections, fileInputSF)
     except FileNotFoundError:
         
         print("Please input a valid file")
@@ -188,9 +181,9 @@ def convertToHash(file):
 #Function to scan digital signature of file
 def scan_signature():
     #Ask for filename
-    fileInput = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
+    fileInputSign = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
     try:
-        hash = convertToHash(fileInput)
+        hash = convertToHash(fileInputSign)
         #Debug
         #print(hash)
         #Send request to API
@@ -198,7 +191,7 @@ def scan_signature():
         #Find number of malicious detections
         numberOfMaliciousDetections = file.last_analysis_stats['malicious']
         #Run remove_file function
-        remove_file(numberOfMaliciousDetections, fileInput)
+        remove_file(numberOfMaliciousDetections, fileInputSign)
     except FileNotFoundError:
         print("Please input a valid file")
         showerror(
@@ -424,7 +417,7 @@ root = tk.Tk()
 root.title('Anti Keylogger')
 root.geometry('700x500')
 btnRetrieveProcesses = tk.Button(root, text = "Retrieve Processes", command=retrieveProcessList).place(x=50,y=450)
-btnScanFile = tk.Button(root, text = "Scan File", command=scan_file).place(x=200,y=450)
+btnScanFile = tk.Button(root, text = "Scan File", command=scanFileWin).place(x=200,y=450)
 btnScanSignature = tk.Button(root, text = "Scan File Signature", command=scan_signature).place(x=300,y=450)
 btnProcMon = tk.Button(root, text = "Process Monitor", command=procMonWin).place(x=450,y=450)
 btnPortMon = tk.Button(root, text = "Port Monitor", command=portMonitor).place(x=600,y=450)
