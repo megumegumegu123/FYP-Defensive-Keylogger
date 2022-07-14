@@ -34,7 +34,12 @@ client = vt.Client(
 
 # Names of software which should be removed
 # Add a box which shows the blacklist and allow to add
-blacklistNames = ['keylogger']
+try:
+    with open("blacklistNames.txt", "r") as f:
+        blacklistNames = f.read().splitlines()
+except FileNotFoundError:
+    with open("blacklistNames.txt", "w+") as f:
+        blacklistNames = f.read().splitlines()
 try:
     with open("blacklistedSoftware.txt", "r") as f:
         blacklisted_software = f.read().splitlines()
@@ -58,8 +63,6 @@ class Process(object):
         self.pid = process_info[1]
 
 # Function to remove keylogger
-
-
 def removeKeylogger(pid):
     stdout.write("Killing process")
     # 9 because it represents termination https://en.wikipedia.org/wiki/Signal_(IPC)
