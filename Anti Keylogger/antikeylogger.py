@@ -452,7 +452,8 @@ def portMonitor():
                 # if process is not in whitelist, check if it should be
                 elif process_name not in whitelisted_software:
                     print("Pausing application...\n")
-                    p.suspend()
+                    if pid != 0:
+                        p.suspend()          
                     print(
                         "Information on application identified in your system to be potential threat...")
                     print(f'Application name: {process_name}\n'
@@ -475,7 +476,8 @@ def portMonitor():
                             time = 1
                         elif is_safe == 'yes':
                             print("Resuming process...")
-                            p.resume()
+                            if pid != 0:
+                                p.resume()
                             print("Adding to whitelist...")
                             whitelisted_software.append(process_name)
                             showinfo('Adding to Whitelist', 'Adding ' + process_name + 'to the whitelist')
