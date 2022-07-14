@@ -333,8 +333,6 @@ def procMon():
         return endTable
 
 # Creating the Window to show the table in the GUI
-
-
 def procMonWin():
     # Setting the variable to get value from function procMon
     table = procMon()
