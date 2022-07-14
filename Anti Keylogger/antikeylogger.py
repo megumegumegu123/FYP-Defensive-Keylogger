@@ -1,9 +1,10 @@
 from cgitb import text
+from concurrent.futures import thread
 import subprocess
 import sys
 import os
 import signal
-from tkinter.messagebox import askquestion, showerror, showinfo
+from tkinter.messagebox import askquestion, showerror, showinfo, showwarning
 import vt
 import shutil
 import time
@@ -135,16 +136,22 @@ def Process_path(pid):
 
 
 def scanFileWin():
+    #Remind the process cannot be stopped until it is done scanning file
     showinfo(root, message="Remember this process cannot be stopped!")
+    #Make the file input for scan file only to global so the scan file function can get the input
     global fileInputSF
+    #Asking for the file that needs to be scanned
     fileInputSF = tk.filedialog.askopenfilename(
         parent=root, title='Choose a file')
+    #Start the thread for scan file function
     scanFileThread = Thread(target=scan_file)
     scanFileThread.start()
+    #allow the scan file window to be referrenced in scan file function
     global scanningWin
+    #code to start scan file window
     scanningWin = Toplevel(root)
     scanningWin.title("Scan File")
-    scanningWin.geometry("300x300")
+    scanningWin.geometry("300x100")
     scanningLabel = Label(scanningWin, text="Scanning in Progress")
     scanningLabel.pack()
     scanningLabel.place(x=100, y=50)
@@ -158,8 +165,6 @@ def scanFileWin():
 
 
 def scan_file():
-    # Ask for filename
-    # fileInput = tk.filedialog.askopenfilename(parent=root,title='Choose a file')
     # try except to catch FileNotFoundError
     try:
         with open(fileInputSF, 'rb') as f:
@@ -185,6 +190,7 @@ def scan_file():
             title="Error!",
             message="Please input a valid file"
         )
+        scanningWin.destroy()
         pass
 
 # Function to convert file to SHA1
@@ -206,11 +212,33 @@ def convertToHash(file):
 
 # Function to scan digital signature of file
 
+def scanSignatureWinFun():
+    #Remind the process cannot be stopped until it is done scanning file
+    showinfo(root, message="Remember this process cannot be stopped!")
+    #Make the file input for scanSignature only to global so the scan signature function can get the input
+    global fileInputSign
+    #Asking for the file that needs to be scanned
+    fileInputSign = tk.filedialog.askopenfilename(
+        parent=root, title='Choose a file')
+    #Start the thread for scan signature function
+    scanSignThread = Thread(target=scan_signature)
+    scanSignThread.start()
+    #allow the scan signature window to be referrenced in scan signature function
+    global scanSignWin
+    #code to start scan file window
+    scanSignWin = Toplevel(root)
+    scanSignWin.title("Scan File")
+    scanSignWin.geometry("400x100")
+    scanSignLabel = Label(scanSignWin, text="Scanning file using file signature in Progress")
+    scanSignLabel.pack()
+    scanSignLabel.place(x=75, y=50)
+    #Prevent the process from stopping
+    def disable_event():
+        pass
+    scanSignWin.wm_protocol("WM_DELETE_WINDOW", disable_event)
 
 def scan_signature():
     # Ask for filename
-    fileInputSign = tk.filedialog.askopenfilename(
-        parent=root, title='Choose a file')
     try:
         hash = convertToHash(fileInputSign)
         # Debug
@@ -222,11 +250,11 @@ def scan_signature():
         # Run remove_file function
         remove_file(numberOfMaliciousDetections, fileInputSign)
     except FileNotFoundError:
-        print("Please input a valid file")
         showerror(
             title="Error!",
             message="Please input a valid file"
         )
+        scanSignWin.destroy()
         pass
 
 # Function to delete file
@@ -346,11 +374,13 @@ def procMonWin():
     updateTable()
 
 
-def portMonWin():
+def portMonWinFun():
+    global portMonWin
+    scanPortThread = Thread(target=portMonitor)
+    scanPortThread.start()
     portMonWin = Toplevel(root)
     portMonWin.title("Port Monitor")
     portMonWin.geometry("500x300")
-    portMonWin.grab_set()
     whiteListString = StringVar()
     for software in whitelisted_software:
         whiteList = 'Whitelisted Softwares: ' + str(software)
@@ -366,25 +396,21 @@ def portMonWin():
     blackListLabel = Label(portMonWin, textvariable=blackListString)
     blackListLabel.pack()
     blackListLabel.place(x=0, y=100)
-
-    def exitWin():
-        portMonWin.destroy()
-    exitBtn = Button(portMonWin, text="Exit", command=exitWin)
-    exitBtn.pack()
-    exitBtn.place(x=450, y=250)
-    scanningLabel = Label(portMonWin, text="Scanning...")
+    scanningLabel = Label(portMonWin, text="Monitoring Ports...")
     scanningLabel.pack()
     scanningLabel.place(x=200, y=250)
+    def disable_event():
+        pass
+    portMonWin.wm_protocol('WM_DELETE_WINDOW', disable_event)
 
 
 # GUI Showing blacklisted_software + whitelisted_software and detected ports and software
 # Monitors SMTP ports for any activities
 def portMonitor():
-    portMonWin()
     time = 1
     while True:
         if time == 1:
-            print("\nScanning in progress...")
+            print("\nMonitoring in progress...")
 
         proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True, stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
@@ -417,11 +443,13 @@ def portMonitor():
             p = psutil.Process(int(pid))
             if process_name not in whitelisted_software:
                 print("KEYLOGGER DETECTED!")
+                showwarning(title="Unknown process found!", message="We found a unknown process that is not stated in the whitelisted software.")
                 # terminate process if it exists in blacklist
                 if process_name in blacklisted_software:
                     p.kill()
                     print(
                         "Blacklist application found running.\nProcess automatically terminated.")
+                    showinfo(title="Killing process", message="This process is found in the blacklist. Stopping the process now!")
                     time = 1
                 # if process is not in whitelist, check if it should be
                 elif process_name not in whitelisted_software:
@@ -434,22 +462,25 @@ def portMonitor():
                           f'Trying to communicate on port {port}\n')
                     selected = False
                     while not selected:
-                        is_safe = input(
-                            "Would you like to whitelist this application? (Y/N): ").lower()
-                        if is_safe == 'n':
+                        is_safe = askquestion('Add to whitelist?','Information on application identified in your system to be potential threat...\nApplication name: ' + process_name + '\nProcess ID (PID): ' + pid + '\nTrying to communicate on port: ' + port_num + '\n\nWould you like to whitelist this application? (No will result in adding this application to blacklist and terminates the process!)')
+                        # is_safe = input(
+                        #     "Would you like to whitelist this application? (Y/N): ").lower()
+                        if is_safe == 'no':
                             print("Terminating process...")
                             p.kill()
                             print("Adding to blacklist...")
+                            showinfo('Adding to Blacklist', 'Adding ' + process_name + 'to the blacklist')
                             blacklisted_software.append(process_name)
                             with open("blacklistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
                             selected = True
                             time = 1
-                        elif is_safe == 'y':
+                        elif is_safe == 'yes':
                             print("Resuming process...")
                             p.resume()
                             print("Adding to whitelist...")
                             whitelisted_software.append(process_name)
+                            showinfo('Adding to Whitelist', 'Adding ' + process_name + 'to the whitelist')
                             with open("whitelistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
                             selected = True
@@ -465,9 +496,9 @@ btnRetrieveProcesses = tk.Button(
 btnScanFile = tk.Button(root, text="Scan File",
                         command=scanFileWin).place(x=200, y=450)
 btnScanSignature = tk.Button(
-    root, text="Scan File Signature", command=scan_signature).place(x=300, y=450)
+    root, text="Scan File Signature", command=scanSignatureWinFun).place(x=300, y=450)
 btnProcMon = tk.Button(root, text="Process Monitor",
                        command=procMonWin).place(x=450, y=450)
 btnPortMon = tk.Button(root, text="Port Monitor",
-                       command=portMonitor).place(x=600, y=450)
+                       command=portMonWinFun).place(x=600, y=450)
 root.mainloop()
