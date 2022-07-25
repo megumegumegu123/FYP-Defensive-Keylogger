@@ -34,23 +34,22 @@ client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0
 # Names of software which should be removed
 # Add a box which shows the blacklist and allow to add
 try:
-    with open("blacklistNames.txt", "r") as f:
+    with open("Anti Keylogger/blacklistNames.txt", "r") as f:
         blacklistNames = f.read().splitlines()
 except FileNotFoundError:
-    with open("blacklistNames.txt", "w+") as f:
+    with open("Anti Keylogger/blacklistNames.txt", "w+") as f:
         blacklistNames = f.read().splitlines()
 try:
-    with open("blacklistedSoftware.txt", "r") as f:
+    with open("Anti Keylogger/blacklistedSoftware.txt", "r") as f:
         blacklisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("blacklistedSoftware.txt", "w+") as f:
+    with open("Anti Keylogger/blacklistedSoftware.txt", "w+") as f:
         blacklisted_software = f.read().splitlines()
-
 try:
-    with open("whitelistedSoftware.txt", "r") as f:
+    with open("Anti Keylogger/whitelistedSoftware.txt", "r") as f:
         whitelisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("whitelistedSoftware.txt", "w+") as f:
+    with open("Anti Keylogger/whitelistedSoftware.txt", "w+") as f:
         whitelisted_software = f.read().splitlines()
 
 # Process class to retrieve process name and process PID
@@ -98,7 +97,6 @@ def retrieveProcessList():
             # Upper so that processes with capital and small letters are matched evenly
             if(process.name.upper().find(blacklisted.upper()) > -1):
                 keyloggerDetected += 1
-
                 option = askquestion(root, 'Keylogger detected with the process name of: ' + process.name + '\nPID: ' +
                                      process.pid + '\nDo you want to delete the file?\n(NO will result in ending the process.)')
                 # print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
@@ -246,7 +244,8 @@ def scan_signature():
         # Debug
         # print(hash)
         # Send request to API
-        file = client.get_object(f'/files/{hash}')
+        print(hash)
+        file = client.get_object("/files/{}",hash)
         # Find number of malicious detections
         numberOfMaliciousDetections = file.last_analysis_stats['malicious']
         # Run remove_file function
