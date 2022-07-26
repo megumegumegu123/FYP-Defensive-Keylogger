@@ -408,6 +408,7 @@ def portMonWinFun():
 # GUI Showing blacklisted_software + whitelisted_software and detected ports and software
 # Monitors SMTP ports for any activities
 def portMonitor():
+    btnPortMon['state'] = DISABLED
     time = 1
     while True:
         if time == 1:
@@ -502,6 +503,9 @@ btnScanSignature = tk.Button(
     root, text="Scan File Signature", command=scanSignatureWinFun).place(x=300, y=450)
 btnProcMon = tk.Button(root, text="Process Monitor",
                        command=procMonWin).place(x=450, y=450)
-btnPortMon = tk.Button(root, text="Port Monitor",
-                       command=portMonWinFun).place(x=600, y=450)
+def btnPortMonDis():
+    btnPortMon['state'] = DISABLED
+btnPortMon = Button(root, text="Port Monitor",
+                       command=portMonWinFun)
+btnPortMon.place(x=600,y=450)
 root.mainloop()
