@@ -252,9 +252,11 @@ def scan_signature():
             # Find number of malicious detections
             numberOfMaliciousDetections = file.last_analysis_stats['malicious']
             # Run remove_file function
+            scanSignWin.destroy()
             remove_file(numberOfMaliciousDetections, fileInputSign)
         except:
             print("Error! Please use file signatures that have previously been uploaded into the database.")
+            showerror(title="Error!", message="Error! Please use file signatures that have previously been uploaded into the database.")
             return
     except FileNotFoundError:
         showerror(
