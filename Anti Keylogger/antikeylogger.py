@@ -34,22 +34,22 @@ client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0
 # Names of software which should be removed
 # Add a box which shows the blacklist and allow to add
 try:
-    with open("Anti Keylogger/blacklistNames.txt", "r") as f:
+    with open("blacklistNames.txt", "r") as f:
         blacklistNames = f.read().splitlines()
 except FileNotFoundError:
-    with open("Anti Keylogger/blacklistNames.txt", "w+") as f:
+    with open("blacklistNames.txt", "w+") as f:
         blacklistNames = f.read().splitlines()
 try:
-    with open("Anti Keylogger/blacklistedSoftware.txt", "r") as f:
+    with open("blacklistedSoftware.txt", "r") as f:
         blacklisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("Anti Keylogger/blacklistedSoftware.txt", "w+") as f:
+    with open("blacklistedSoftware.txt", "w+") as f:
         blacklisted_software = f.read().splitlines()
 try:
-    with open("Anti Keylogger/whitelistedSoftware.txt", "r") as f:
+    with open("whitelistedSoftware.txt", "r") as f:
         whitelisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("Anti Keylogger/whitelistedSoftware.txt", "w+") as f:
+    with open("whitelistedSoftware.txt", "w+") as f:
         whitelisted_software = f.read().splitlines()
 
 # Process class to retrieve process name and process PID
