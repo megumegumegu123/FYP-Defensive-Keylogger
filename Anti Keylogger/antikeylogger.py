@@ -140,7 +140,7 @@ def Process_path(pid):
 
 def scanFileWin():
     #Remind the process cannot be stopped until it is done scanning file
-    showinfo(root, message="Remember this process cannot be stopped!")
+    showinfo(root, message="Remember this process cannot be stopped! No access to other function while scanning.")
     #Make the file input for scan file only to global so the scan file function can get the input
     global fileInputSF
     #Asking for the file that needs to be scanned
@@ -158,7 +158,7 @@ def scanFileWin():
     scanningLabel = Label(scanningWin, text="Scanning in Progress")
     scanningLabel.pack()
     scanningLabel.place(x=100, y=50)
-
+    scanningWin.grab_set()
     def disable_event():
         pass
     scanningWin.wm_protocol("WM_DELETE_WINDOW", disable_event)
@@ -220,7 +220,7 @@ def convertToHash(file):
 
 def scanSignatureWinFun():
     #Remind the process cannot be stopped until it is done scanning file
-    showinfo(root, message="Remember this process cannot be stopped! Only file signatures that have previously been uploaded will have a result!    ")
+    showinfo(root, message="Remember this process cannot be stopped! Only file signatures that have previously been uploaded will have a result! No access to other function while scanning.")
     #Make the file input for scanSignature only to global so the scan signature function can get the input
     global fileInputSign
     #Asking for the file that needs to be scanned
@@ -238,6 +238,7 @@ def scanSignatureWinFun():
     scanSignLabel = Label(scanSignWin, text="Scanning file using file signature in Progress")
     scanSignLabel.pack()
     scanSignLabel.place(x=75, y=50)
+    scanSignWin.grab_set()
     #Prevent the process from stopping
     def disable_event():
         pass
