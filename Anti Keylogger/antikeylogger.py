@@ -27,29 +27,31 @@ from datetime import datetime
 from win32com.client import GetObject
 from sys import stdout
 from threading import *
-# Virustotal API key (Stay Hidden)
-client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
-#client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
+# Virustotal API key
+try:
+    client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
+except:
+    client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
 
 # Names of software which should be removed
 # Add a box which shows the blacklist and allow to add
 try:
-    with open("Anti Keylogger/blacklistNames.txt", "r") as f:
+    with open("blacklistNames.txt", "r") as f:
         blacklistNames = f.read().splitlines()
 except FileNotFoundError:
-    with open("Anti Keylogger/blacklistNames.txt", "w+") as f:
+    with open("blacklistNames.txt", "w+") as f:
         blacklistNames = f.read().splitlines()
 try:
-    with open("Anti Keylogger/blacklistedSoftware.txt", "r") as f:
+    with open("blacklistedSoftware.txt", "r") as f:
         blacklisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("Anti Keylogger/blacklistedSoftware.txt", "w+") as f:
+    with open("blacklistedSoftware.txt", "w+") as f:
         blacklisted_software = f.read().splitlines()
 try:
-    with open("Anti Keylogger/whitelistedSoftware.txt", "r") as f:
+    with open("whitelistedSoftware.txt", "r") as f:
         whitelisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("Anti Keylogger/whitelistedSoftware.txt", "w+") as f:
+    with open("whitelistedSoftware.txt", "w+") as f:
         whitelisted_software = f.read().splitlines()
 
 # Process class to retrieve process name and process PID
@@ -245,11 +247,15 @@ def scan_signature():
         # print(hash)
         # Send request to API
         print(hash)
-        file = client.get_object("/files/{}",hash)
-        # Find number of malicious detections
-        numberOfMaliciousDetections = file.last_analysis_stats['malicious']
-        # Run remove_file function
-        remove_file(numberOfMaliciousDetections, fileInputSign)
+        try:
+            file = client.get_object("/files/{}",hash)
+            # Find number of malicious detections
+            numberOfMaliciousDetections = file.last_analysis_stats['malicious']
+            # Run remove_file function
+            remove_file(numberOfMaliciousDetections, fileInputSign)
+        except:
+            print("Error! Please use file signatures that have previously been uploaded into the database.")
+            return
     except FileNotFoundError:
         showerror(
             title="Error!",
