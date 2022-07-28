@@ -470,7 +470,7 @@ def portMonitor():
                             print("Terminating process...")
                             p.kill()
                             print("Adding to blacklist...")
-                            showinfo('Adding to Blacklist', 'Adding ' + process_name + 'to the blacklist')
+                            showinfo('Adding to Blacklist', 'Adding ' + process_name + ' to the blacklist')
                             blacklisted_software.append(process_name)
                             with open("blacklistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
@@ -501,8 +501,6 @@ btnScanSignature = tk.Button(
     root, text="Scan File Signature", command=scanSignatureWinFun).place(x=300, y=450)
 btnProcMon = tk.Button(root, text="Process Monitor",
                        command=procMonWin).place(x=450, y=450)
-def btnPortMonDis():
-    btnPortMon['state'] = DISABLED
 btnPortMon = Button(root, text="Port Monitor",
                        command=portMonWinFun)
 btnPortMon.place(x=600,y=450)
