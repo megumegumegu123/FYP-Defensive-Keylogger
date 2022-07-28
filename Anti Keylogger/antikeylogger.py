@@ -36,23 +36,25 @@ except:
 
 # Names of software which should be removed
 # Add a box which shows the blacklist and allow to add
+cwd = os.getcwd() #get current working directory
+print(cwd)
 try:
-    with open("blacklistNames.txt", "r") as f:
+    with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "r") as f:
         blacklistNames = f.read().splitlines()
 except FileNotFoundError:
-    with open("blacklistNames.txt", "w+") as f:
+    with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "w+") as f:
         blacklistNames = f.read().splitlines()
 try:
-    with open("blacklistedSoftware.txt", "r") as f:
+    with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
         blacklisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("blacklistedSoftware.txt", "w+") as f:
+    with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "w+") as f:
         blacklisted_software = f.read().splitlines()
 try:
-    with open("whitelistedSoftware.txt", "r") as f:
+    with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
         whitelisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open("whitelistedSoftware.txt", "w+") as f:
+    with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "w+") as f:
         whitelisted_software = f.read().splitlines()
 
 # Process class to retrieve process name and process PID
@@ -390,7 +392,28 @@ def procMonWin():
     # Start updating the table
     updateTable()
 
+#Updates both whitelist and blacklist in portMon Window
+def updateList():
+    whiteListString = StringVar()
+    blackListString = StringVar()
+    whiteList = 'Whitelisted Softwares: ' 
+    blackList = 'Blacklisted Softwares: ' 
+    whiteListString.set(whiteList)
+    blackListString.set(blackList)
+    for software in whitelisted_software:
+        whiteList = whiteList + str(software)
+        if software != whitelisted_software[len(whitelisted_software)-1]:
+            whiteList = whiteList +", "
+        whiteListString.set(whiteList)
+    for software in blacklisted_software:
+        blackList = blackList + str(software)
+        if software != blacklisted_software[len(blacklisted_software)-1]:
+            blackList = blackList +", "
+        blackListString.set(blackList)
+    blackListLabel['textvariable']= blackListString
+    whiteListLabel['textvariable']= whiteListString
 
+#portMon wwindow function
 def portMonWinFun():
     global portMonWin
     scanPortThread = Thread(target=portMonitor)
@@ -399,17 +422,27 @@ def portMonWinFun():
     portMonWin.title("Port Monitor")
     portMonWin.geometry("500x300")
     whiteListString = StringVar()
-    for software in whitelisted_software:
-        whiteList = 'Whitelisted Softwares: ' + str(software)
-        whiteListString.set(whiteList)
     blackListString = StringVar()
+    whiteList = 'Whitelisted Softwares: ' 
+    blackList = 'Blacklisted Softwares: ' 
+    whiteListString.set(whiteList)
+    blackListString.set(blackList)
+    for software in whitelisted_software:
+        whiteList = whiteList + str(software)
+        if software != whitelisted_software[len(whitelisted_software)-1]:
+            whiteList = whiteList +", "
+        whiteListString.set(whiteList)
     for software in blacklisted_software:
-        blackList = 'Blacklisted Softwares: ' + str(software)
+        blackList = blackList + str(software)
+        if software != blacklisted_software[len(blacklisted_software)-1]:
+            blackList = blackList +", "
         blackListString.set(blackList)
+    global whiteListLabel
     whiteListLabel = Label(
-        portMonWin, text="Whitelisted Softwares:", textvariable=whiteListString)
+        portMonWin, textvariable=whiteListString)
     whiteListLabel.pack()
     whiteListLabel.place(x=0, y=0)
+    global blackListLabel
     blackListLabel = Label(portMonWin, textvariable=blackListString)
     blackListLabel.pack()
     blackListLabel.place(x=0, y=100)
@@ -490,8 +523,9 @@ def portMonitor():
                             print("Adding to blacklist...")
                             showinfo('Adding to Blacklist', 'Adding ' + process_name + ' to the blacklist')
                             blacklisted_software.append(process_name)
-                            with open("blacklistedSoftware.txt", "a") as f:
+                            with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
+                            updateList()
                             selected = True
                             time = 1
                         elif is_safe == 'yes':
@@ -500,9 +534,10 @@ def portMonitor():
                                 p.resume()
                             print("Adding to whitelist...")
                             whitelisted_software.append(process_name)
-                            showinfo('Adding to Whitelist', 'Adding ' + process_name + 'to the whitelist')
-                            with open("whitelistedSoftware.txt", "a") as f:
+                            showinfo('Adding to Whitelist', 'Adding ' + process_name + ' to the whitelist')
+                            with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
+                            updateList()
                             selected = True
                             time = 1
 
