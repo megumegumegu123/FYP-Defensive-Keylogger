@@ -8,6 +8,7 @@ from tkinter.messagebox import askquestion, showerror, showinfo, showwarning
 import vt
 import shutil
 import time
+import aiohttp
 import hashlib
 import fileinput
 import requests
@@ -171,18 +172,21 @@ def scan_file():
     try:
         with open(fileInputSF, 'rb') as f:
             # Scan file
-            analysis = client.scan_file(f)
-            print("Scanning...")
-            # Keep looping until analysis is completed
-            while True:
-                analysis = client.get_object("/analyses/{}", analysis.id)
-                print(analysis.status)
-                # End loop when analysis is completed
-                if analysis.status == "completed":
-                    scanningWin.destroy()
-                    break
-            # Find number of malicious detections
-            numberOfMaliciousDetections = analysis.stats['malicious']
+            try:
+                analysis = client.scan_file(f)
+                print("Scanning...")
+                # Keep looping until analysis is completed
+                while True:
+                    analysis = client.get_object("/analyses/{}", analysis.id)
+                    print(analysis.status)
+                    # End loop when analysis is completed
+                    if analysis.status == "completed":
+                        scanningWin.destroy()
+                        break
+                # Find number of malicious detections
+                numberOfMaliciousDetections = analysis.stats['malicious']
+            except aiohttp.ClientConnectorError:
+                print("no internet")
             # Run remove_file function
             remove_file(numberOfMaliciousDetections, fileInputSF)
     except FileNotFoundError:
@@ -216,7 +220,7 @@ def convertToHash(file):
 
 def scanSignatureWinFun():
     #Remind the process cannot be stopped until it is done scanning file
-    showinfo(root, message="Remember this process cannot be stopped! Only file signatures that have previously been uploaded will have a result!")
+    showinfo(root, message="Remember this process cannot be stopped! Only file signatures that have previously been uploaded will have a result!    ")
     #Make the file input for scanSignature only to global so the scan signature function can get the input
     global fileInputSign
     #Asking for the file that needs to be scanned
