@@ -216,7 +216,7 @@ def convertToHash(file):
 
 def scanSignatureWinFun():
     #Remind the process cannot be stopped until it is done scanning file
-    showinfo(root, message="Remember this process cannot be stopped!")
+    showinfo(root, message="Remember this process cannot be stopped! Only file signatures that have previously been uploaded will have a result!")
     #Make the file input for scanSignature only to global so the scan signature function can get the input
     global fileInputSign
     #Asking for the file that needs to be scanned
