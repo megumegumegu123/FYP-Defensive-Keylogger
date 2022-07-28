@@ -245,11 +245,15 @@ def scan_signature():
         # print(hash)
         # Send request to API
         print(hash)
-        file = client.get_object("/files/{}",hash)
-        # Find number of malicious detections
-        numberOfMaliciousDetections = file.last_analysis_stats['malicious']
-        # Run remove_file function
-        remove_file(numberOfMaliciousDetections, fileInputSign)
+        try:
+            file = client.get_object("/files/{}",hash)
+            # Find number of malicious detections
+            numberOfMaliciousDetections = file.last_analysis_stats['malicious']
+            # Run remove_file function
+            remove_file(numberOfMaliciousDetections, fileInputSign)
+        except:
+            print("Error! Please use file signatures that have previously been uploaded into the database.")
+            return
     except FileNotFoundError:
         showerror(
             title="Error!",
