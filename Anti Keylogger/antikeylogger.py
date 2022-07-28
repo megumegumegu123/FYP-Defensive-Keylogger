@@ -171,8 +171,9 @@ def scan_file():
     # try except to catch FileNotFoundError
     try:
         with open(fileInputSF, 'rb') as f:
-            # Scan file
+            # try except to catch no internet connection
             try:
+                # Scan file
                 analysis = client.scan_file(f)
                 print("Scanning...")
                 # Keep looping until analysis is completed
@@ -185,12 +186,11 @@ def scan_file():
                         break
                 # Find number of malicious detections
                 numberOfMaliciousDetections = analysis.stats['malicious']
+                # Run remove_file function
+                remove_file(numberOfMaliciousDetections, fileInputSF)
             except aiohttp.ClientConnectorError:
-                print("no internet")
-            # Run remove_file function
-            remove_file(numberOfMaliciousDetections, fileInputSF)
+                print("No internet detected")
     except FileNotFoundError:
-
         print("Please input a valid file")
         showerror(
             title="Error!",
@@ -251,12 +251,17 @@ def scan_signature():
         # print(hash)
         # Send request to API
         print(hash)
+        # try except to catch file not found
         try:
-            file = client.get_object("/files/{}",hash)
-            # Find number of malicious detections
-            numberOfMaliciousDetections = file.last_analysis_stats['malicious']
-            # Run remove_file function
-            remove_file(numberOfMaliciousDetections, fileInputSign)
+            # try except to catch no interenet detected
+            try:
+                file = client.get_object("/files/{}",hash)
+                # Find number of malicious detections
+                numberOfMaliciousDetections = file.last_analysis_stats['malicious']
+                # Run remove_file function
+                remove_file(numberOfMaliciousDetections, fileInputSign)
+            except aiohttp.ClientConnectorError:
+                print("No internet detected")
         except:
             print("Error! Please use file signatures that have previously been uploaded into the database.")
             return
