@@ -396,59 +396,86 @@ def procMonWin():
 def updateList():
     whiteListString = StringVar()
     blackListString = StringVar()
-    whiteList = 'Whitelisted Softwares: ' 
-    blackList = 'Blacklisted Softwares: ' 
-    whiteListString.set(whiteList)
-    blackListString.set(blackList)
-    for software in whitelisted_software:
-        whiteList = whiteList + str(software)
-        if software != whitelisted_software[len(whitelisted_software)-1]:
-            whiteList = whiteList +", "
-        whiteListString.set(whiteList)
-    for software in blacklisted_software:
-        blackList = blackList + str(software)
-        if software != blacklisted_software[len(blacklisted_software)-1]:
-            blackList = blackList +", "
-        blackListString.set(blackList)
-    blackListLabel['textvariable']= blackListString
-    whiteListLabel['textvariable']= whiteListString
+    # whiteList = 'Whitelisted Softwares: ' 
+    # blackList = 'Blacklisted Softwares: ' 
+    whiteListString.set(whitelisted_software)
+    blackListString.set(blacklisted_software)
+    # for software in whitelisted_software:
+    #     whiteList = whiteList + str(software)
+    #     if software != whitelisted_software[len(whitelisted_software)-1]:
+    #         whiteList = whiteList +", "
+    #     whiteListString.set(whiteList)
+    # for software in blacklisted_software:
+    #     blackList = blackList + str(software)
+    #     if software != blacklisted_software[len(blacklisted_software)-1]:
+    #         blackList = blackList +", "
+    #     blackListString.set(blackList)
+    blackListListbox['listvariable']= blackListString
+    whiteListListbox['listvariable']= whiteListString
 
 #portMon wwindow function
 def portMonWinFun():
-    global portMonWin
+    #Need to thread the portMonitor function as tkinter need its own thread
     scanPortThread = Thread(target=portMonitor)
     scanPortThread.start()
+    #allowing referencing of portMon window at other function
+    global portMonWin
+    #Creating portMon Window
     portMonWin = Toplevel(root)
     portMonWin.title("Port Monitor")
     portMonWin.geometry("500x300")
+    #initialising the variable for tkinter to accept them
     whiteListString = StringVar()
     blackListString = StringVar()
-    whiteList = 'Whitelisted Softwares: ' 
-    blackList = 'Blacklisted Softwares: ' 
-    whiteListString.set(whiteList)
-    blackListString.set(blackList)
-    for software in whitelisted_software:
-        whiteList = whiteList + str(software)
-        if software != whitelisted_software[len(whitelisted_software)-1]:
-            whiteList = whiteList +", "
-        whiteListString.set(whiteList)
-    for software in blacklisted_software:
-        blackList = blackList + str(software)
-        if software != blacklisted_software[len(blacklisted_software)-1]:
-            blackList = blackList +", "
-        blackListString.set(blackList)
-    global whiteListLabel
-    whiteListLabel = Label(
-        portMonWin, textvariable=whiteListString)
+    #setting the variable so tkinter can accept them
+    whiteListString.set(whitelisted_software)
+    blackListString.set(blacklisted_software)
+    #Labeling the whitelist listbox
+    whiteListLabel = Label(portMonWin,text='Whitelisted Softwares')
     whiteListLabel.pack()
     whiteListLabel.place(x=0, y=0)
-    global blackListLabel
-    blackListLabel = Label(portMonWin, textvariable=blackListString)
+    #allow constant update using another function thus need to global it
+    global whiteListListbox    
+    #Allow scrollbar to fit in nicely with listbox using frame
+    whiteListFrame = Frame(portMonWin)
+    whiteListFrame.pack()
+    whiteListFrame.place(x=0, y=30)
+    #Creating the whitelist Listbox 
+    whiteListListbox = Listbox(whiteListFrame, listvariable=whiteListString, height=5,width=35)
+    whiteListListbox.pack(side='left',fill='y')
+    whiteListScroll = Scrollbar(
+        whiteListFrame,
+        orient='vertical',
+        command=whiteListListbox.yview
+    )
+    whiteListListbox['yscrollcommand']=whiteListScroll.set
+    whiteListScroll.pack(side='right',fill='y')
+    #Labeling the blacklist Listbox
+    blackListLabel = Label(portMonWin,text='Blacklisted Softwares')
     blackListLabel.pack()
-    blackListLabel.place(x=0, y=100)
+    blackListLabel.place(x=250, y=0)
+    #allow constant update using another function thus need to global it
+    global blackListListbox
+    #Allow scrollbar to fit in nicely with listbox using frame
+    blackListFrame = Frame(portMonWin)
+    blackListFrame.pack()
+    blackListFrame.place(x=250, y=30)
+    #Creating the blacklist Listbox
+    blackListListbox = Listbox(blackListFrame, listvariable=blackListString, height=5,width=35)    
+    blackListListbox.pack(side='left',fill='y')
+    #scroll bar for blacklist listbox
+    blackListScroll = Scrollbar(
+        blackListFrame,
+        orient='vertical',
+        command=blackListListbox.yview
+    )
+    blackListListbox['yscrollcommand']=blackListScroll.set
+    blackListScroll.pack(side='right',fill='y')
+    #Reminding the user it is monitoring
     scanningLabel = Label(portMonWin, text="Monitoring Ports...")
     scanningLabel.pack()
     scanningLabel.place(x=200, y=250)
+    #disable the ability to close the portMon window so it can run constantly
     def disable_event():
         pass
     portMonWin.wm_protocol('WM_DELETE_WINDOW', disable_event)
