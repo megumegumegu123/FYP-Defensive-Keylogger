@@ -5,6 +5,7 @@ import sys
 import os
 import signal
 from tkinter.messagebox import askquestion, showerror, showinfo, showwarning
+from wsgiref.simple_server import software_version
 import vt
 import shutil
 import time
@@ -71,10 +72,8 @@ def removeKeylogger(pid):
     # 9 because it represents termination https://en.wikipedia.org/wiki/Signal_(IPC)
     os.kill(int(pid), 9)
 
-# Button here to run this function
+
 # Function to retrieve processes
-
-
 def retrieveProcessList():
     processList = []
     keyloggerDetected = 0
@@ -129,8 +128,6 @@ def retrieveProcessList():
         showinfo(root, message="No keylogger was detected.")
 
 # Retrieve process path
-
-
 def Process_path(pid):
     WMI = GetObject('winmgmts:')
     processes = WMI.InstancesOf('Win32_Process')
@@ -165,10 +162,8 @@ def scanFileWin():
         pass
     scanningWin.wm_protocol("WM_DELETE_WINDOW", disable_event)
 
-# Button
+
 # Scan file if it is malicious or not
-
-
 def scan_file():
     # try except to catch FileNotFoundError
     try:
@@ -202,8 +197,6 @@ def scan_file():
         pass
 
 # Function to convert file to SHA1
-
-
 def convertToHash(file):
     # make a hash object
     h = hashlib.sha1()
@@ -219,7 +212,6 @@ def convertToHash(file):
     return h.hexdigest()
 
 # Function to scan digital signature of file
-
 def scanSignatureWinFun():
     #Remind the process cannot be stopped until it is done scanning file
     showinfo(root, message="Remember this process cannot be stopped! Only file signatures that have previously been uploaded will have a result! No access to other function while scanning.")
@@ -279,8 +271,6 @@ def scan_signature():
         pass
 
 # Function to delete file
-
-
 def remove_file(num, fileInput):
     # If >0 then remove file
     if(num) > 0:
@@ -295,8 +285,6 @@ def remove_file(num, fileInput):
         client.close()
 
 # GUI Auto Update Page
-
-
 def procMon():
     # https://www.geeksforgeeks.org/how-to-make-a-process-monitor-in-python/
     # Run an infinite loop to constantly monitor the system
@@ -443,16 +431,39 @@ def addProWhiteL():
         showinfo(title='Exit', message= fileName + ' is not added.')
         return None
 
-#portMon wwindow function
+#portMon window function
 def portMonWinFun():
     def deletewhitelistItem():
         item = whitelistListbox.curselection()
-        print(whitelistListbox.get(item))
+        itemName = whitelistListbox.get(item)
+        print(itemName)
         whitelistListbox.delete(item)
+        #read file
+        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
+            softwares = f.readlines()
+        #write file
+        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "w") as f:
+            for software in softwares:
+                    if software.strip() != itemName:
+                        f.write(software)
+            f.truncate
+        
     def deleteblacklistItem():
         item = blacklistListbox.curselection()
-        print(blacklistListbox.get(item))
-        blacklistListbox.delete(item)    
+        itemName = blacklistListbox.get(item)
+        print(itemName)
+        blacklistListbox.delete(item)
+        #read file
+        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
+            softwares = f.readlines()
+        #write file
+        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "w") as f:
+            for software in softwares:
+                    if software.strip() != itemName:
+                        f.write(software)
+            f.truncate
+
+  
     #Need to thread the portMonitor function as tkinter need its own thread
     scanPortThread = Thread(target=portMonitor)
     scanPortThread.start()
