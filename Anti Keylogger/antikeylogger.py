@@ -102,7 +102,7 @@ def retrieveProcessList():
             # Upper so that processes with capital and small letters are matched evenly
             if(process.name.upper().find(blacklisted.upper()) > -1):
                 keyloggerDetected += 1
-                option = askquestion(root, 'Keylogger detected with the process name of: ' + process.name + '\nPID: ' +
+                option = askquestion('Select your option', 'Keylogger detected with the process name of: ' + process.name + '\nPID: ' +
                                      process.pid + '\nDo you want to delete the file?\n(NO will result in ending the process.)')
                 # print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
                 # option = input("Delete File? (Y/N)")
@@ -396,25 +396,63 @@ def procMonWin():
 def updateList():
     whiteListString = StringVar()
     blackListString = StringVar()
-    # whiteList = 'Whitelisted Softwares: ' 
-    # blackList = 'Blacklisted Softwares: ' 
     whiteListString.set(whitelisted_software)
     blackListString.set(blacklisted_software)
-    # for software in whitelisted_software:
-    #     whiteList = whiteList + str(software)
-    #     if software != whitelisted_software[len(whitelisted_software)-1]:
-    #         whiteList = whiteList +", "
-    #     whiteListString.set(whiteList)
-    # for software in blacklisted_software:
-    #     blackList = blackList + str(software)
-    #     if software != blacklisted_software[len(blacklisted_software)-1]:
-    #         blackList = blackList +", "
-    #     blackListString.set(blackList)
-    blackListListbox['listvariable']= blackListString
-    whiteListListbox['listvariable']= whiteListString
+    blacklistListbox['listvariable']= blackListString
+    whitelistListbox['listvariable']= whiteListString
+
+#add new process to blacklist
+def addProBlackL():
+    #setting filetypes
+    filetypes = (('exe files', '*.exe'),('All files', '*.*'))   
+    fileNameRaw = tk.filedialog.askopenfilename(title='Select a file', initialdir='/', filetypes= filetypes)
+    print(len(fileNameRaw))
+    if fileNameRaw == '' or len(fileNameRaw) == 0:
+        return None
+    fileNameList = fileNameRaw.split('/')
+    fileName = fileNameList[-1]
+    option = askquestion('Selected file', 'Are you sure you want to add '+ fileName + ' to your blacklist?')
+    if (option == 'yes'):
+        showinfo('Adding to Blacklist', 'Adding ' + fileName + ' to the blacklist')
+        blacklisted_software.append(fileName)
+        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
+            f.write('%s\n' % fileName)
+        updateList()
+    else:
+        showinfo(title='Exit', message= fileName + ' is not added.')
+        return None
+
+#add new process to whitelist
+def addProWhiteL():
+    #setting filetypes
+    filetypes = (('exe files', '*.exe'),('All files', '*.*'))   
+    fileNameRaw = tk.filedialog.askopenfilename(title='Select a file', initialdir='/', filetypes= filetypes)
+    print(len(fileNameRaw))
+    if fileNameRaw == '' or len(fileNameRaw) == 0:
+        return None
+    fileNameList = fileNameRaw.split('/')
+    fileName = fileNameList[-1]
+    option = askquestion('Selected file', 'Are you sure you want to add '+ fileName + ' to your whitelist?')
+    if (option == 'yes'):
+        showinfo('Adding to whitelist', 'Adding ' + fileName + ' to the whitelist')
+        whitelisted_software.append(fileName)
+        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
+            f.write('%s\n' % fileName)
+        updateList()
+    else:
+        showinfo(title='Exit', message= fileName + ' is not added.')
+        return None
 
 #portMon wwindow function
 def portMonWinFun():
+    def deletewhitelistItem():
+        item = whitelistListbox.curselection()
+        print(whitelistListbox.get(item))
+        whitelistListbox.delete(item)
+    def deleteblacklistItem():
+        item = blacklistListbox.curselection()
+        print(blacklistListbox.get(item))
+        blacklistListbox.delete(item)    
     #Need to thread the portMonitor function as tkinter need its own thread
     scanPortThread = Thread(target=portMonitor)
     scanPortThread.start()
@@ -425,52 +463,69 @@ def portMonWinFun():
     portMonWin.title("Port Monitor")
     portMonWin.geometry("500x300")
     #initialising the variable for tkinter to accept them
-    whiteListString = StringVar()
-    blackListString = StringVar()
+    whitelistString = StringVar()
+    blacklistString = StringVar()
     #setting the variable so tkinter can accept them
-    whiteListString.set(whitelisted_software)
-    blackListString.set(blacklisted_software)
+    whitelistString.set(whitelisted_software)
+    blacklistString.set(blacklisted_software)
     #Labeling the whitelist listbox
-    whiteListLabel = Label(portMonWin,text='Whitelisted Softwares')
-    whiteListLabel.pack()
-    whiteListLabel.place(x=0, y=0)
+    whitelistLabel = Label(portMonWin,text='Whitelisted Softwares')
+    whitelistLabel.pack()
+    whitelistLabel.place(x=0, y=0)
     #allow constant update using another function thus need to global it
-    global whiteListListbox    
+    global whitelistListbox    
     #Allow scrollbar to fit in nicely with listbox using frame
-    whiteListFrame = Frame(portMonWin)
-    whiteListFrame.pack()
-    whiteListFrame.place(x=0, y=30)
+    whitelistFrame = Frame(portMonWin)
+    whitelistFrame.pack()
+    whitelistFrame.place(x=0, y=30)
     #Creating the whitelist Listbox 
-    whiteListListbox = Listbox(whiteListFrame, listvariable=whiteListString, height=5,width=35)
-    whiteListListbox.pack(side='left',fill='y')
-    whiteListScroll = Scrollbar(
-        whiteListFrame,
+    whitelistListbox = Listbox(whitelistFrame, listvariable=whitelistString, height=5,width=35)
+    whitelistListbox.pack(side='left',fill='y')
+    #add new entry to whitelist with button
+    addWhitelistBtn = Button(portMonWin, text='Add...',command=addProWhiteL)
+    addWhitelistBtn.pack()
+    addWhitelistBtn.place(x=90,y=125)
+    #delete whitelist items
+    deleteWhiteLBtn = Button(portMonWin,text='Delete',command=deletewhitelistItem)
+    deleteWhiteLBtn.pack()
+    deleteWhiteLBtn.place(x=150,y=125)
+    #Scroll bar for whitelist
+    whitelistScroll = Scrollbar(
+        whitelistFrame,
         orient='vertical',
-        command=whiteListListbox.yview
+        command=whitelistListbox.yview
     )
-    whiteListListbox['yscrollcommand']=whiteListScroll.set
-    whiteListScroll.pack(side='right',fill='y')
+    whitelistListbox['yscrollcommand']=whitelistScroll.set
+    whitelistScroll.pack(side='right',fill='y')
     #Labeling the blacklist Listbox
-    blackListLabel = Label(portMonWin,text='Blacklisted Softwares')
-    blackListLabel.pack()
-    blackListLabel.place(x=250, y=0)
+    blacklistLabel = Label(portMonWin,text='Blacklisted Softwares')
+    blacklistLabel.pack()
+    blacklistLabel.place(x=250, y=0)
     #allow constant update using another function thus need to global it
-    global blackListListbox
+    global blacklistListbox
     #Allow scrollbar to fit in nicely with listbox using frame
-    blackListFrame = Frame(portMonWin)
-    blackListFrame.pack()
-    blackListFrame.place(x=250, y=30)
+    blacklistFrame = Frame(portMonWin)
+    blacklistFrame.pack()
+    blacklistFrame.place(x=250, y=30)
     #Creating the blacklist Listbox
-    blackListListbox = Listbox(blackListFrame, listvariable=blackListString, height=5,width=35)    
-    blackListListbox.pack(side='left',fill='y')
+    blacklistListbox = Listbox(blacklistFrame, listvariable=blacklistString, height=5,width=35)    
+    blacklistListbox.pack(side='left',fill='y')
+    #button to allow add a new process to the blacklist
+    addBlacklistBtn = Button(portMonWin, text='Add...',command=addProBlackL)
+    addBlacklistBtn.pack()
+    addBlacklistBtn.place(x=340,y=125)
+    #delete blacklist item
+    deleteBlackLBtn = Button(portMonWin,text='Delete',command=deleteblacklistItem)
+    deleteBlackLBtn.pack()
+    deleteBlackLBtn.place(x=400,y=125)
     #scroll bar for blacklist listbox
-    blackListScroll = Scrollbar(
-        blackListFrame,
+    blacklistScroll = Scrollbar(
+        blacklistFrame,
         orient='vertical',
-        command=blackListListbox.yview
+        command=blacklistListbox.yview
     )
-    blackListListbox['yscrollcommand']=blackListScroll.set
-    blackListScroll.pack(side='right',fill='y')
+    blacklistListbox['yscrollcommand']=blacklistScroll.set
+    blacklistScroll.pack(side='right',fill='y')
     #Reminding the user it is monitoring
     scanningLabel = Label(portMonWin, text="Monitoring Ports...")
     scanningLabel.pack()
