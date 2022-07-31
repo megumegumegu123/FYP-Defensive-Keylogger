@@ -1,2 +1,3 @@
 com.barraider.spotify.exe
 OVRServer_x64.exe
+svchost.exe
