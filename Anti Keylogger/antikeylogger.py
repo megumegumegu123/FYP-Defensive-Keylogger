@@ -29,17 +29,12 @@ from datetime import datetime
 from win32com.client import GetObject
 from sys import stdout
 from threading import *
-# Virustotal API key
-try:
-    client = vt.Client(
-        "9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
-except:
-    client = vt.Client(
-        "2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
+# Virustotal API key    
+client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
+#client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
 
-# Names of software which should be removed
-# Add a box which shows the blacklist and allow to add
-cwd = os.getcwd()  # get current working directory
+# get current working directory
+cwd = os.getcwd()
 print(cwd)
 try:
     with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "r") as f:
@@ -61,16 +56,12 @@ except FileNotFoundError:
         whitelisted_software = f.read().splitlines()
 
 # Process class to retrieve process name and process PID
-
-
 class Process(object):
     def __init__(self, process_info):
         self.name = process_info[0]
         self.pid = process_info[1]
 
 # Function to remove keylogger
-
-
 def removeKeylogger(pid):
     stdout.write("Killing process")
     # 9 because it represents termination https://en.wikipedia.org/wiki/Signal_(IPC)
@@ -111,7 +102,7 @@ def retrieveProcessList():
                 # option = input("Delete File? (Y/N)")
                 if (option == "yes"):
                     # Find file path
-                    print(
+                    print(  
                         f'The location of the file is: {Process_path(int(process.pid))}')
                     # Delete file at that file path
                     try:
@@ -132,8 +123,6 @@ def retrieveProcessList():
         showinfo(root, message="No keylogger was detected.")
 
 # Retrieve process path
-
-
 def Process_path(pid):
     WMI = GetObject('winmgmts:')
     processes = WMI.InstancesOf('Win32_Process')
@@ -194,6 +183,10 @@ def scan_file():
                 remove_file(numberOfMaliciousDetections, fileInputSF)
             except aiohttp.ClientConnectorError:
                 print("No internet detected")
+                showerror(
+            title="Error!",
+            message="No internet is detected"
+        )
     except FileNotFoundError:
         print("Please input a valid file")
         showerror(
@@ -204,8 +197,6 @@ def scan_file():
         pass
 
 # Function to convert file to SHA1
-
-
 def convertToHash(file):
     # make a hash object
     h = hashlib.sha1()
@@ -272,6 +263,10 @@ def scan_signature():
                 remove_file(numberOfMaliciousDetections, fileInputSign)
             except aiohttp.ClientConnectorError:
                 print("No internet detected")
+                showerror(
+            title="Error!",
+            message="No internet is detected"
+        )
         except:
             print(
                 "Error! Please use file signatures that have previously been uploaded into the database.")
@@ -583,6 +578,7 @@ def portMonitor():
     while True:
         if time == 1:
             print("\nMonitoring in progress...")
+
         proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True, stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
