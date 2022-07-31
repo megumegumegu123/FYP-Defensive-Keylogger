@@ -31,13 +31,15 @@ from sys import stdout
 from threading import *
 # Virustotal API key
 try:
-    client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
+    client = vt.Client(
+        "9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0c0d3")
 except:
-    client = vt.Client("2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
+    client = vt.Client(
+        "2ccc95e2724256413dbaa1afcb4eef24f05fb708f3075c76b5fb7fc820465be6")
 
 # Names of software which should be removed
 # Add a box which shows the blacklist and allow to add
-cwd = os.getcwd() #get current working directory
+cwd = os.getcwd()  # get current working directory
 print(cwd)
 try:
     with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "r") as f:
@@ -67,6 +69,8 @@ class Process(object):
         self.pid = process_info[1]
 
 # Function to remove keylogger
+
+
 def removeKeylogger(pid):
     stdout.write("Killing process")
     # 9 because it represents termination https://en.wikipedia.org/wiki/Signal_(IPC)
@@ -128,6 +132,8 @@ def retrieveProcessList():
         showinfo(root, message="No keylogger was detected.")
 
 # Retrieve process path
+
+
 def Process_path(pid):
     WMI = GetObject('winmgmts:')
     processes = WMI.InstancesOf('Win32_Process')
@@ -138,19 +144,19 @@ def Process_path(pid):
 
 
 def scanFileWin():
-    #Remind the process cannot be stopped until it is done scanning file
+    # Remind the process cannot be stopped until it is done scanning file
     showinfo(root, message="Remember this process cannot be stopped! No access to other function while scanning.")
-    #Make the file input for scan file only to global so the scan file function can get the input
+    # Make the file input for scan file only to global so the scan file function can get the input
     global fileInputSF
-    #Asking for the file that needs to be scanned
+    # Asking for the file that needs to be scanned
     fileInputSF = tk.filedialog.askopenfilename(
         parent=root, title='Choose a file')
-    #Start the thread for scan file function
+    # Start the thread for scan file function
     scanFileThread = Thread(target=scan_file)
     scanFileThread.start()
-    #allow the scan file window to be referrenced in scan file function
+    # allow the scan file window to be referrenced in scan file function
     global scanningWin
-    #code to start scan file window
+    # code to start scan file window
     scanningWin = Toplevel(root)
     scanningWin.title("Scan File")
     scanningWin.geometry("300x100")
@@ -158,6 +164,7 @@ def scanFileWin():
     scanningLabel.pack()
     scanningLabel.place(x=100, y=50)
     scanningWin.grab_set()
+
     def disable_event():
         pass
     scanningWin.wm_protocol("WM_DELETE_WINDOW", disable_event)
@@ -197,6 +204,8 @@ def scan_file():
         pass
 
 # Function to convert file to SHA1
+
+
 def convertToHash(file):
     # make a hash object
     h = hashlib.sha1()
@@ -212,31 +221,36 @@ def convertToHash(file):
     return h.hexdigest()
 
 # Function to scan digital signature of file
+
+
 def scanSignatureWinFun():
-    #Remind the process cannot be stopped until it is done scanning file
+    # Remind the process cannot be stopped until it is done scanning file
     showinfo(root, message="Remember this process cannot be stopped! Only file signatures that have previously been uploaded will have a result! No access to other function while scanning.")
-    #Make the file input for scanSignature only to global so the scan signature function can get the input
+    # Make the file input for scanSignature only to global so the scan signature function can get the input
     global fileInputSign
-    #Asking for the file that needs to be scanned
+    # Asking for the file that needs to be scanned
     fileInputSign = tk.filedialog.askopenfilename(
         parent=root, title='Choose a file')
-    #Start the thread for scan signature function
+    # Start the thread for scan signature function
     scanSignThread = Thread(target=scan_signature)
     scanSignThread.start()
-    #allow the scan signature window to be referrenced in scan signature function
+    # allow the scan signature window to be referrenced in scan signature function
     global scanSignWin
-    #code to start scan file window
+    # code to start scan file window
     scanSignWin = Toplevel(root)
     scanSignWin.title("Scan File")
     scanSignWin.geometry("400x100")
-    scanSignLabel = Label(scanSignWin, text="Scanning file using file signature in Progress")
+    scanSignLabel = Label(
+        scanSignWin, text="Scanning file using file signature in Progress")
     scanSignLabel.pack()
     scanSignLabel.place(x=75, y=50)
     scanSignWin.grab_set()
-    #Prevent the process from stopping
+    # Prevent the process from stopping
+
     def disable_event():
         pass
     scanSignWin.wm_protocol("WM_DELETE_WINDOW", disable_event)
+
 
 def scan_signature():
     # Ask for filename
@@ -250,7 +264,7 @@ def scan_signature():
         try:
             # try except to catch no interenet detected
             try:
-                file = client.get_object("/files/{}",hash)
+                file = client.get_object("/files/{}", hash)
                 # Find number of malicious detections
                 numberOfMaliciousDetections = file.last_analysis_stats['malicious']
                 # Run remove_file function
@@ -259,8 +273,11 @@ def scan_signature():
             except aiohttp.ClientConnectorError:
                 print("No internet detected")
         except:
-            print("Error! Please use file signatures that have previously been uploaded into the database.")
-            showerror(title="Error!", message="Error! Please use file signatures that have previously been uploaded into the database.")
+            print(
+                "Error! Please use file signatures that have previously been uploaded into the database.")
+            showerror(
+                title="Error!", message="Error! Please use file signatures that have previously been uploaded into the database.")
+            scanSignWin.destroy()
             return
     except FileNotFoundError:
         showerror(
@@ -271,6 +288,8 @@ def scan_signature():
         pass
 
 # Function to delete file
+
+
 def remove_file(num, fileInput):
     # If >0 then remove file
     if(num) > 0:
@@ -284,7 +303,6 @@ def remove_file(num, fileInput):
         showinfo(title="Results", message="File is not malicious.")
         client.close()
 
-# GUI Auto Update Page
 def procMon():
     # https://www.geeksforgeeks.org/how-to-make-a-process-monitor-in-python/
     # Run an infinite loop to constantly monitor the system
@@ -342,6 +360,8 @@ def procMon():
         return endTable
 
 # Creating the Window to show the table in the GUI
+
+
 def procMonWin():
     # Setting the variable to get value from function procMon
     table = procMon()
@@ -364,8 +384,8 @@ def procMonWin():
 
     def exitWin():
         procMonWin.destroy()
-    # Function to update the table on the procMon Winodw
 
+    # Function to update the table on the procMon Winodw
     def updateTable():
         table = procMon()
         procMonTableString.set(table)
@@ -380,174 +400,182 @@ def procMonWin():
     # Start updating the table
     updateTable()
 
-#Updates both whitelist and blacklist in portMon Window
+# Updates both whitelist and blacklist in portMon Window
 def updateList():
     whiteListString = StringVar()
     blackListString = StringVar()
     whiteListString.set(whitelisted_software)
     blackListString.set(blacklisted_software)
-    blacklistListbox['listvariable']= blackListString
-    whitelistListbox['listvariable']= whiteListString
+    blacklistListbox['listvariable'] = blackListString
+    whitelistListbox['listvariable'] = whiteListString
 
-#add new process to blacklist
+# add new process to blacklist
 def addProBlackL():
-    #setting filetypes
-    filetypes = (('exe files', '*.exe'),('All files', '*.*'))   
-    fileNameRaw = tk.filedialog.askopenfilename(title='Select a file', initialdir='/', filetypes= filetypes)
+    # setting filetypes
+    filetypes = (('exe files', '*.exe'), ('All files', '*.*'))
+    fileNameRaw = tk.filedialog.askopenfilename(
+        title='Select a file', initialdir='/', filetypes=filetypes)
     print(len(fileNameRaw))
     if fileNameRaw == '' or len(fileNameRaw) == 0:
         return None
     fileNameList = fileNameRaw.split('/')
     fileName = fileNameList[-1]
-    option = askquestion('Selected file', 'Are you sure you want to add '+ fileName + ' to your blacklist?')
+    option = askquestion(
+        'Selected file', 'Are you sure you want to add ' + fileName + ' to your blacklist?')
     if (option == 'yes'):
-        showinfo('Adding to Blacklist', 'Adding ' + fileName + ' to the blacklist')
+        showinfo('Adding to Blacklist', 'Adding ' +
+                 fileName + ' to the blacklist')
         blacklisted_software.append(fileName)
         with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
             f.write('%s\n' % fileName)
         updateList()
     else:
-        showinfo(title='Exit', message= fileName + ' is not added.')
+        showinfo(title='Exit', message=fileName + ' is not added.')
         return None
 
-#add new process to whitelist
+# add new process to whitelist
 def addProWhiteL():
-    #setting filetypes
-    filetypes = (('exe files', '*.exe'),('All files', '*.*'))   
-    fileNameRaw = tk.filedialog.askopenfilename(title='Select a file', initialdir='/', filetypes= filetypes)
+    # setting filetypes
+    filetypes = (('exe files', '*.exe'), ('All files', '*.*'))
+    fileNameRaw = tk.filedialog.askopenfilename(
+        title='Select a file', initialdir='/', filetypes=filetypes)
     print(len(fileNameRaw))
     if fileNameRaw == '' or len(fileNameRaw) == 0:
         return None
     fileNameList = fileNameRaw.split('/')
     fileName = fileNameList[-1]
-    option = askquestion('Selected file', 'Are you sure you want to add '+ fileName + ' to your whitelist?')
+    option = askquestion(
+        'Selected file', 'Are you sure you want to add ' + fileName + ' to your whitelist?')
     if (option == 'yes'):
-        showinfo('Adding to whitelist', 'Adding ' + fileName + ' to the whitelist')
+        showinfo('Adding to whitelist', 'Adding ' +
+                 fileName + ' to the whitelist')
         whitelisted_software.append(fileName)
         with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
             f.write('%s\n' % fileName)
         updateList()
     else:
-        showinfo(title='Exit', message= fileName + ' is not added.')
+        showinfo(title='Exit', message=fileName + ' is not added.')
         return None
 
-#portMon window function
+# portMon window function
 def portMonWinFun():
     def deletewhitelistItem():
         item = whitelistListbox.curselection()
         itemName = whitelistListbox.get(item)
         print(itemName)
         whitelistListbox.delete(item)
-        #read file
+        # read file
         with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
             softwares = f.readlines()
-        #write file
+        # write file
         with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "w") as f:
             for software in softwares:
-                    if software.strip() != itemName:
-                        f.write(software)
+                if software.strip() != itemName:
+                    f.write(software)
             f.truncate
-        
+
     def deleteblacklistItem():
         item = blacklistListbox.curselection()
         itemName = blacklistListbox.get(item)
         print(itemName)
         blacklistListbox.delete(item)
-        #read file
+        # read file
         with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
             softwares = f.readlines()
-        #write file
+        # write file
         with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "w") as f:
             for software in softwares:
-                    if software.strip() != itemName:
-                        f.write(software)
+                if software.strip() != itemName:
+                    f.write(software)
             f.truncate
 
-  
-    #Need to thread the portMonitor function as tkinter need its own thread
+    # Need to thread the portMonitor function as tkinter need its own thread
     scanPortThread = Thread(target=portMonitor)
     scanPortThread.start()
-    #allowing referencing of portMon window at other function
+    # allowing referencing of portMon window at other function
     global portMonWin
-    #Creating portMon Window
+    # Creating portMon Window
     portMonWin = Toplevel(root)
     portMonWin.title("Port Monitor")
     portMonWin.geometry("500x300")
-    #initialising the variable for tkinter to accept them
+    # initialising the variable for tkinter to accept them
     whitelistString = StringVar()
     blacklistString = StringVar()
-    #setting the variable so tkinter can accept them
+    # setting the variable so tkinter can accept them
     whitelistString.set(whitelisted_software)
     blacklistString.set(blacklisted_software)
-    #Labeling the whitelist listbox
-    whitelistLabel = Label(portMonWin,text='Whitelisted Softwares')
+    # Labeling the whitelist listbox
+    whitelistLabel = Label(portMonWin, text='Whitelisted Softwares')
     whitelistLabel.pack()
     whitelistLabel.place(x=0, y=0)
-    #allow constant update using another function thus need to global it
-    global whitelistListbox    
-    #Allow scrollbar to fit in nicely with listbox using frame
+    # allow constant update using another function thus need to global it
+    global whitelistListbox
+    # Allow scrollbar to fit in nicely with listbox using frame
     whitelistFrame = Frame(portMonWin)
     whitelistFrame.pack()
     whitelistFrame.place(x=0, y=30)
-    #Creating the whitelist Listbox 
-    whitelistListbox = Listbox(whitelistFrame, listvariable=whitelistString, height=5,width=35)
-    whitelistListbox.pack(side='left',fill='y')
-    #add new entry to whitelist with button
-    addWhitelistBtn = Button(portMonWin, text='Add...',command=addProWhiteL)
+    # Creating the whitelist Listbox
+    whitelistListbox = Listbox(
+        whitelistFrame, listvariable=whitelistString, height=5, width=35)
+    whitelistListbox.pack(side='left', fill='y')
+    # add new entry to whitelist with button
+    addWhitelistBtn = Button(portMonWin, text='Add...', command=addProWhiteL)
     addWhitelistBtn.pack()
-    addWhitelistBtn.place(x=90,y=125)
-    #delete whitelist items
-    deleteWhiteLBtn = Button(portMonWin,text='Delete',command=deletewhitelistItem)
+    addWhitelistBtn.place(x=90, y=125)
+    # delete whitelist items
+    deleteWhiteLBtn = Button(portMonWin, text='Delete',
+                             command=deletewhitelistItem)
     deleteWhiteLBtn.pack()
-    deleteWhiteLBtn.place(x=150,y=125)
-    #Scroll bar for whitelist
+    deleteWhiteLBtn.place(x=150, y=125)
+    # Scroll bar for whitelist
     whitelistScroll = Scrollbar(
         whitelistFrame,
         orient='vertical',
         command=whitelistListbox.yview
     )
-    whitelistListbox['yscrollcommand']=whitelistScroll.set
-    whitelistScroll.pack(side='right',fill='y')
-    #Labeling the blacklist Listbox
-    blacklistLabel = Label(portMonWin,text='Blacklisted Softwares')
+    whitelistListbox['yscrollcommand'] = whitelistScroll.set
+    whitelistScroll.pack(side='right', fill='y')
+    # Labeling the blacklist Listbox
+    blacklistLabel = Label(portMonWin, text='Blacklisted Softwares')
     blacklistLabel.pack()
     blacklistLabel.place(x=250, y=0)
-    #allow constant update using another function thus need to global it
+    # allow constant update using another function thus need to global it
     global blacklistListbox
-    #Allow scrollbar to fit in nicely with listbox using frame
+    # Allow scrollbar to fit in nicely with listbox using frame
     blacklistFrame = Frame(portMonWin)
     blacklistFrame.pack()
     blacklistFrame.place(x=250, y=30)
-    #Creating the blacklist Listbox
-    blacklistListbox = Listbox(blacklistFrame, listvariable=blacklistString, height=5,width=35)    
-    blacklistListbox.pack(side='left',fill='y')
-    #button to allow add a new process to the blacklist
-    addBlacklistBtn = Button(portMonWin, text='Add...',command=addProBlackL)
+    # Creating the blacklist Listbox
+    blacklistListbox = Listbox(
+        blacklistFrame, listvariable=blacklistString, height=5, width=35)
+    blacklistListbox.pack(side='left', fill='y')
+    # button to allow add a new process to the blacklist
+    addBlacklistBtn = Button(portMonWin, text='Add...', command=addProBlackL)
     addBlacklistBtn.pack()
-    addBlacklistBtn.place(x=340,y=125)
-    #delete blacklist item
-    deleteBlackLBtn = Button(portMonWin,text='Delete',command=deleteblacklistItem)
+    addBlacklistBtn.place(x=340, y=125)
+    # delete blacklist item
+    deleteBlackLBtn = Button(portMonWin, text='Delete',
+                             command=deleteblacklistItem)
     deleteBlackLBtn.pack()
-    deleteBlackLBtn.place(x=400,y=125)
-    #scroll bar for blacklist listbox
+    deleteBlackLBtn.place(x=400, y=125)
+    # scroll bar for blacklist listbox
     blacklistScroll = Scrollbar(
         blacklistFrame,
         orient='vertical',
         command=blacklistListbox.yview
     )
-    blacklistListbox['yscrollcommand']=blacklistScroll.set
-    blacklistScroll.pack(side='right',fill='y')
-    #Reminding the user it is monitoring
+    blacklistListbox['yscrollcommand'] = blacklistScroll.set
+    blacklistScroll.pack(side='right', fill='y')
+    # Reminding the user it is monitoring
     scanningLabel = Label(portMonWin, text="Monitoring Ports...")
     scanningLabel.pack()
     scanningLabel.place(x=200, y=250)
-    #disable the ability to close the portMon window so it can run constantly
+    # disable the ability to close the portMon window so it can run constantly
+
     def disable_event():
         pass
     portMonWin.wm_protocol('WM_DELETE_WINDOW', disable_event)
 
-
-# GUI Showing blacklisted_software + whitelisted_software and detected ports and software
 # Monitors SMTP ports for any activities
 def portMonitor():
     btnPortMon['state'] = DISABLED
@@ -555,7 +583,6 @@ def portMonitor():
     while True:
         if time == 1:
             print("\nMonitoring in progress...")
-
         proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True, stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
@@ -587,19 +614,21 @@ def portMonitor():
             p = psutil.Process(int(pid))
             if process_name not in whitelisted_software:
                 print("KEYLOGGER DETECTED!")
-                showwarning(title="Unknown process found!", message="We found a unknown process that is not stated in the whitelisted software.")
+                showwarning(title="Unknown process found!",
+                            message="We found a unknown process that is not stated in the whitelisted software.")
                 # terminate process if it exists in blacklist
                 if process_name in blacklisted_software:
                     p.kill()
                     print(
                         "Blacklist application found running.\nProcess automatically terminated.")
-                    showinfo(title="Killing process", message="This process is found in the blacklist. Stopping the process now!")
+                    showinfo(title="Killing process",
+                             message="This process is found in the blacklist. Stopping the process now!")
                     time = 1
                 # if process is not in whitelist, check if it should be
                 elif process_name not in whitelisted_software:
                     print("Pausing application...\n")
                     if pid != 0:
-                        p.suspend()          
+                        p.suspend()
                     print(
                         "Information on application identified in your system to be potential threat...")
                     print(f'Application name: {process_name}\n'
@@ -607,14 +636,16 @@ def portMonitor():
                           f'Trying to communicate on port {port}\n')
                     selected = False
                     while not selected:
-                        is_safe = askquestion('Add to whitelist?','Information on application identified in your system to be potential threat...\nApplication name: ' + process_name + '\nProcess ID (PID): ' + pid + '\nTrying to communicate on port: ' + port_num + '\n\nWould you like to whitelist this application? (No will result in adding this application to blacklist and terminates the process!)')
+                        is_safe = askquestion('Add to whitelist?', 'Information on application identified in your system to be potential threat...\nApplication name: ' + process_name + '\nProcess ID (PID): ' + pid +
+                                              '\nTrying to communicate on port: ' + port_num + '\n\nWould you like to whitelist this application? (No will result in adding this application to blacklist and terminates the process!)')
                         # is_safe = input(
                         #     "Would you like to whitelist this application? (Y/N): ").lower()
                         if is_safe == 'no':
                             print("Terminating process...")
                             p.kill()
                             print("Adding to blacklist...")
-                            showinfo('Adding to Blacklist', 'Adding ' + process_name + ' to the blacklist')
+                            showinfo('Adding to Blacklist', 'Adding ' +
+                                     process_name + ' to the blacklist')
                             blacklisted_software.append(process_name)
                             with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
@@ -627,7 +658,8 @@ def portMonitor():
                                 p.resume()
                             print("Adding to whitelist...")
                             whitelisted_software.append(process_name)
-                            showinfo('Adding to Whitelist', 'Adding ' + process_name + ' to the whitelist')
+                            showinfo('Adding to Whitelist', 'Adding ' +
+                                     process_name + ' to the whitelist')
                             with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
                             updateList()
@@ -648,6 +680,6 @@ btnScanSignature = tk.Button(
 btnProcMon = tk.Button(root, text="Process Monitor",
                        command=procMonWin).place(x=450, y=450)
 btnPortMon = Button(root, text="Port Monitor",
-                       command=portMonWinFun)
-btnPortMon.place(x=600,y=450)
+                    command=portMonWinFun)
+btnPortMon.place(x=600, y=450)
 root.mainloop()
