@@ -455,6 +455,7 @@ def portMonWinFun():
         if item == ():
             return None
         itemName = whitelistListbox.get(item)        
+        whitelisted_software.remove(itemName)
         whitelistListbox.delete(item)
         # read file
         with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
@@ -474,6 +475,7 @@ def portMonWinFun():
             return None
         #get the item name in the list box so can be removed from txt file
         itemName = blacklistListbox.get(item)
+        blacklisted_software.remove(itemName)
         #delete the item in the listbox
         blacklistListbox.delete(item)
         # read file
