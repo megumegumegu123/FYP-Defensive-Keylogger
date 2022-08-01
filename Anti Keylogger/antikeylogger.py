@@ -409,18 +409,25 @@ def addProBlackL():
         return None
     fileNameList = fileNameRaw.split('/')
     fileName = fileNameList[-1]
-    option = askquestion(
-        'Selected file', 'Are you sure you want to add ' + fileName + ' to your blacklist?')
-    if (option == 'yes'):
-        showinfo('Adding to Blacklist', 'Adding ' +
-                 fileName + ' to the blacklist')
-        blacklisted_software.append(fileName)
-        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
-            f.write('%s\n' % fileName)
-        updateList()
-    else:
-        showinfo(title='Exit', message=fileName + ' is not added.')
+    if(fileName in blacklisted_software):
+        showinfo(title='Exit', message=fileName + ' is already in the blacklist.')
         return None
+    elif (fileName in whitelisted_software):
+        showinfo(title='Exit', message=fileName + ' is already in the whitelist.')
+        return None
+    else:
+        option = askquestion(
+            'Selected file', 'Are you sure you want to add ' + fileName + ' to your blacklist?')
+        if (option == 'yes'):
+            showinfo('Adding to Blacklist', 'Adding ' +
+                    fileName + ' to the blacklist')
+            blacklisted_software.append(fileName)
+            with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
+                f.write('%s\n' % fileName)
+            updateList()
+        else:
+            showinfo(title='Exit', message=fileName + ' is not added.')
+            return None
 
 # add new process to whitelist
 def addProWhiteL():
@@ -433,18 +440,25 @@ def addProWhiteL():
         return None
     fileNameList = fileNameRaw.split('/')
     fileName = fileNameList[-1]
-    option = askquestion(
-        'Selected file', 'Are you sure you want to add ' + fileName + ' to your whitelist?')
-    if (option == 'yes'):
-        showinfo('Adding to whitelist', 'Adding ' +
-                 fileName + ' to the whitelist')
-        whitelisted_software.append(fileName)
-        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
-            f.write('%s\n' % fileName)
-        updateList()
-    else:
-        showinfo(title='Exit', message=fileName + ' is not added.')
+    if(fileName in blacklisted_software):
+        showinfo(title='Exit', message=fileName + ' is already in the blacklist.')
         return None
+    elif (fileName in whitelisted_software):
+        showinfo(title='Exit', message=fileName + ' is already in the whitelist.')
+        return None
+    else:
+        option = askquestion(
+            'Selected file', 'Are you sure you want to add ' + fileName + ' to your whitelist?')
+        if (option == 'yes'):
+            showinfo('Adding to whitelist', 'Adding ' +
+                    fileName + ' to the whitelist')
+            whitelisted_software.append(fileName)
+            with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
+                f.write('%s\n' % fileName)
+            updateList()
+        else:
+            showinfo(title='Exit', message=fileName + ' is not added.')
+            return None
 
 # portMon window function
 def portMonWinFun():
