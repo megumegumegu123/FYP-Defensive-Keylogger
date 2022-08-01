@@ -1,18 +1,12 @@
 from cgitb import text
 from concurrent.futures import thread
 import subprocess
-import sys
 import os
-import signal
 from tkinter.messagebox import askquestion, showerror, showinfo, showwarning
 from wsgiref.simple_server import software_version
 import vt
-import shutil
-import time
 import aiohttp
 import hashlib
-import fileinput
-import requests
 import argparse
 import getopt
 import psutil
