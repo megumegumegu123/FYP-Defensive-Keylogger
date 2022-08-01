@@ -494,14 +494,8 @@ def portMonWinFun():
 
     # Need to thread the portMonitor function as tkinter need its own thread
     scanPortThread = Thread(target=portMonitor)
-    scanPortThread.start()
-<<<<<<< HEAD
-    #Creating portMon Window
-=======
-    # allowing referencing of portMon window at other function
-    global portMonWin
+    scanPortThread.start()   
     # Creating portMon Window
->>>>>>> a6cdc8ecb09dff4d638e42866dbd5ce58f796518
     portMonWin = Toplevel(root)
     portMonWin.title("Port Monitor")
     portMonWin.geometry("500x300")
