@@ -434,9 +434,12 @@ def addProWhiteL():
 #portMon window function
 def portMonWinFun():
     def deletewhitelistItem():
+        #getting the selection in the whitelist listbox
         item = whitelistListbox.curselection()
-        itemName = whitelistListbox.get(item)
-        print(itemName)
+        #error handling if nothing is selected and delete button is pressed
+        if item == ():
+            return None
+        itemName = whitelistListbox.get(item)        
         whitelistListbox.delete(item)
         #read file
         with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
@@ -449,9 +452,14 @@ def portMonWinFun():
             f.truncate
         
     def deleteblacklistItem():
+        #getting the selection in the blacklist listbox
         item = blacklistListbox.curselection()
+        #error handling if nothing is selected and delete button is pressed
+        if item == ():
+            return None
+        #get the item name in the list box so can be removed from txt file
         itemName = blacklistListbox.get(item)
-        print(itemName)
+        #delete the item in the listbox
         blacklistListbox.delete(item)
         #read file
         with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
@@ -467,8 +475,6 @@ def portMonWinFun():
     #Need to thread the portMonitor function as tkinter need its own thread
     scanPortThread = Thread(target=portMonitor)
     scanPortThread.start()
-    #allowing referencing of portMon window at other function
-    global portMonWin
     #Creating portMon Window
     portMonWin = Toplevel(root)
     portMonWin.title("Port Monitor")
@@ -569,11 +575,11 @@ def portMonitor():
         process_name = cmd_output.split()
         time += 1
         if "ESTABLISHED" in output:
-            # delete empty array elements
+            # delete empty list elements
             my_list = list(filter(None, my_list))
             # get the full IP address with port number from the last element from output
             port_num = my_list[-3]
-            # split at the ':' to get port number at last index of array
+            # split at the ':' to get port number at last index of list
             get_port = port_num.split(":")
             port = get_port[-1]
 
