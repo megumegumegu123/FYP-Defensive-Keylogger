@@ -31,22 +31,22 @@ client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0
 cwd = os.getcwd()
 print(cwd)
 try:
-    with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "r") as f:
+    with open(cwd + "\\Anti Keylogger\\blacklistNames.txt", "r") as f:
         blacklistNames = f.read().splitlines()
 except FileNotFoundError:
-    with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "w+") as f:
+    with open(cwd + "\\Anti Keylogger\\blacklistNames.txt", "w+") as f:
         blacklistNames = f.read().splitlines()
 try:
-    with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
+    with open(cwd + "\\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
         blacklisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "w+") as f:
+    with open(cwd + "\\Anti Keylogger\\blacklistedSoftware.txt", "w+") as f:
         blacklisted_software = f.read().splitlines()
 try:
-    with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
+    with open(cwd + "\\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
         whitelisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "w+") as f:
+    with open(cwd + "\\Anti Keylogger\\whitelistedSoftware.txt", "w+") as f:
         whitelisted_software = f.read().splitlines()
 
 # Process class to retrieve process name and process PID
@@ -89,29 +89,32 @@ def retrieveProcessList():
         for blacklisted in blacklistNames:
             # Upper so that processes with capital and small letters are matched evenly
             if(process.name.upper().find(blacklisted.upper()) > -1):
-                keyloggerDetected += 1
-                option = askquestion('Select your option', 'Keylogger detected with the process name of: ' + process.name + '\nPID: ' +
-                                     process.pid + '\nDo you want to delete the file?\n(NO will result in ending the process.)')
-                # print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
-                # option = input("Delete File? (Y/N)")
-                if (option == "yes"):
-                    # Find file path
-                    print(  
-                        f'The location of the file is: {Process_path(int(process.pid))}')
-                    # Delete file at that file path
-                    try:
-                        os.remove(Process_path(int(process.pid)))
-                        showinfo(root, 'Deleted ' + process.name)
-                    except FileNotFoundError:
-                        print("Error finding file")
-                        showerror(
-                            root, 'There is some error deleting the file, recommending manual deletion after ending the process.')
+                if(process.name.upper() == "ANTIKEYLOGGER.EXE"):
+                    keyloggerDetected = 0
+                else:
                     keyloggerDetected += 1
-                elif (option == "no"):
-                    # Remove process
-                    removeKeylogger(process.pid)
-                    showinfo(root, 'Keylogger killed')
-                    keyloggerDetected += 1
+                    option = askquestion('Select your option', 'Keylogger detected with the process name of: ' + process.name + '\nPID: ' +
+                                        process.pid + '\nDo you want to delete the file?\n(NO will result in ending the process.)')
+                    # print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
+                    # option = input("Delete File? (Y/N)")
+                    if (option == "yes"):
+                        # Find file path
+                        print(  
+                            f'The location of the file is: {Process_path(int(process.pid))}')
+                        # Delete file at that file path
+                        try:
+                            os.remove(Process_path(int(process.pid)))
+                            showinfo(root, 'Deleted ' + process.name)
+                        except FileNotFoundError:
+                            print("Error finding file")
+                            showerror(
+                                root, 'There is some error deleting the file, recommending manual deletion after ending the process.')
+                        keyloggerDetected += 1
+                    elif (option == "no"):
+                        # Remove process
+                        removeKeylogger(process.pid)
+                        showinfo(root, 'Keylogger killed')
+                        keyloggerDetected += 1
     if keyloggerDetected == 0:
         print("No keylogger was detected.")
         showinfo(root, message="No keylogger was detected.")
@@ -422,7 +425,7 @@ def addProBlackL():
             showinfo('Adding to Blacklist', 'Adding ' +
                     fileName + ' to the blacklist')
             blacklisted_software.append(fileName)
-            with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
+            with open(cwd + "\\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
                 f.write('%s\n' % fileName)
             updateList()
         else:
@@ -453,7 +456,7 @@ def addProWhiteL():
             showinfo('Adding to whitelist', 'Adding ' +
                     fileName + ' to the whitelist')
             whitelisted_software.append(fileName)
-            with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
+            with open(cwd + "\\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
                 f.write('%s\n' % fileName)
             updateList()
         else:
@@ -472,10 +475,10 @@ def portMonWinFun():
         whitelisted_software.remove(itemName)
         whitelistListbox.delete(item)
         # read file
-        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
+        with open(cwd + "\\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
             softwares = f.readlines()
         # write file
-        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "w") as f:
+        with open(cwd + "\\Anti Keylogger\\whitelistedSoftware.txt", "w") as f:
             for software in softwares:
                 if software.strip() != itemName:
                     f.write(software)
@@ -493,10 +496,10 @@ def portMonWinFun():
         #delete the item in the listbox
         blacklistListbox.delete(item)
         # read file
-        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
+        with open(cwd + "\\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
             softwares = f.readlines()
         # write file
-        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "w") as f:
+        with open(cwd + "\\Anti Keylogger\\blacklistedSoftware.txt", "w") as f:
             for software in softwares:
                 if software.strip() != itemName:
                     f.write(software)
@@ -659,7 +662,7 @@ def portMonitor():
                             showinfo('Adding to Blacklist', 'Adding ' +
                                      process_name + ' to the blacklist')
                             blacklisted_software.append(process_name)
-                            with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
+                            with open(cwd + "\\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
                             updateList()
                             selected = True
@@ -672,7 +675,7 @@ def portMonitor():
                             whitelisted_software.append(process_name)
                             showinfo('Adding to Whitelist', 'Adding ' +
                                      process_name + ' to the whitelist')
-                            with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
+                            with open(cwd + "\\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
                             updateList()
                             selected = True
