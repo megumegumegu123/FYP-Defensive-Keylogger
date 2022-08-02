@@ -31,22 +31,22 @@ client = vt.Client("9227fccdca71a13c63c2cffba56b893341dc44b73b6e567aa8197d4d5ca0
 cwd = os.getcwd()
 print(cwd)
 try:
-    with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "r") as f:
+    with open(cwd + "\textfiles\\blacklistNames.txt", "r") as f:
         blacklistNames = f.read().splitlines()
 except FileNotFoundError:
-    with open(cwd + "\Anti Keylogger\\blacklistNames.txt", "w+") as f:
+    with open(cwd + "\textfiles\\blacklistNames.txt", "w+") as f:
         blacklistNames = f.read().splitlines()
 try:
-    with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
+    with open(cwd + "\textfiles\\blacklistedSoftware.txt", "r") as f:
         blacklisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "w+") as f:
+    with open(cwd + "\textfiles\\blacklistedSoftware.txt", "w+") as f:
         blacklisted_software = f.read().splitlines()
 try:
-    with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
+    with open(cwd + "\textfiles\\whitelistedSoftware.txt", "r") as f:
         whitelisted_software = f.read().splitlines()
 except FileNotFoundError:
-    with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "w+") as f:
+    with open(cwd + "\textfiles\\whitelistedSoftware.txt", "w+") as f:
         whitelisted_software = f.read().splitlines()
 
 # Process class to retrieve process name and process PID
@@ -422,7 +422,7 @@ def addProBlackL():
             showinfo('Adding to Blacklist', 'Adding ' +
                     fileName + ' to the blacklist')
             blacklisted_software.append(fileName)
-            with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
+            with open(cwd + "\textfiles\\blacklistedSoftware.txt", "a") as f:
                 f.write('%s\n' % fileName)
             updateList()
         else:
@@ -453,7 +453,7 @@ def addProWhiteL():
             showinfo('Adding to whitelist', 'Adding ' +
                     fileName + ' to the whitelist')
             whitelisted_software.append(fileName)
-            with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
+            with open(cwd + "\textfiles\\whitelistedSoftware.txt", "a") as f:
                 f.write('%s\n' % fileName)
             updateList()
         else:
@@ -472,10 +472,10 @@ def portMonWinFun():
         whitelisted_software.remove(itemName)
         whitelistListbox.delete(item)
         # read file
-        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "r") as f:
+        with open(cwd + "\textfiles\\whitelistedSoftware.txt", "r") as f:
             softwares = f.readlines()
         # write file
-        with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "w") as f:
+        with open(cwd + "\textfiles\\whitelistedSoftware.txt", "w") as f:
             for software in softwares:
                 if software.strip() != itemName:
                     f.write(software)
@@ -493,10 +493,10 @@ def portMonWinFun():
         #delete the item in the listbox
         blacklistListbox.delete(item)
         # read file
-        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "r") as f:
+        with open(cwd + "\textfiles\\blacklistedSoftware.txt", "r") as f:
             softwares = f.readlines()
         # write file
-        with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "w") as f:
+        with open(cwd + "\textfiles\\blacklistedSoftware.txt", "w") as f:
             for software in softwares:
                 if software.strip() != itemName:
                     f.write(software)
@@ -659,7 +659,7 @@ def portMonitor():
                             showinfo('Adding to Blacklist', 'Adding ' +
                                      process_name + ' to the blacklist')
                             blacklisted_software.append(process_name)
-                            with open(cwd + "\Anti Keylogger\\blacklistedSoftware.txt", "a") as f:
+                            with open(cwd + "\textfiles\\blacklistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
                             updateList()
                             selected = True
@@ -672,7 +672,7 @@ def portMonitor():
                             whitelisted_software.append(process_name)
                             showinfo('Adding to Whitelist', 'Adding ' +
                                      process_name + ' to the whitelist')
-                            with open(cwd + "\Anti Keylogger\\whitelistedSoftware.txt", "a") as f:
+                            with open(cwd + "\textfiles\\whitelistedSoftware.txt", "a") as f:
                                 f.write('%s\n' % process_name)
                             updateList()
                             selected = True
