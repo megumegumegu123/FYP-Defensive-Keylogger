@@ -89,29 +89,33 @@ def retrieveProcessList():
         for blacklisted in blacklistNames:
             # Upper so that processes with capital and small letters are matched evenly
             if(process.name.upper().find(blacklisted.upper()) > -1):
-                keyloggerDetected += 1
-                option = askquestion('Select your option', 'Keylogger detected with the process name of: ' + process.name + '\nPID: ' +
-                                     process.pid + '\nDo you want to delete the file?\n(NO will result in ending the process.)')
-                # print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
-                # option = input("Delete File? (Y/N)")
-                if (option == "yes"):
-                    # Find file path
-                    print(  
-                        f'The location of the file is: {Process_path(int(process.pid))}')
-                    # Delete file at that file path
-                    try:
-                        os.remove(Process_path(int(process.pid)))
-                        showinfo(root, 'Deleted ' + process.name)
-                    except FileNotFoundError:
-                        print("Error finding file")
-                        showerror(
-                            root, 'There is some error deleting the file, recommending manual deletion after ending the process.')
+                # So exe doesnt kill itself
+                if(process.name.upper() == "ANTIKEYLOGGER.EXE"):
+                    keyloggerDetected = 0
+                else:
                     keyloggerDetected += 1
-                elif (option == "no"):
-                    # Remove process
-                    removeKeylogger(process.pid)
-                    showinfo(root, 'Keylogger killed')
-                    keyloggerDetected += 1
+                    option = askquestion('Select your option', 'Keylogger detected with the process name of: ' + process.name + '\nPID: ' +
+                                        process.pid + '\nDo you want to delete the file?\n(NO will result in ending the process.)')
+                    # print('Keylogger detected with the process name of: ' + process.name + '\nPID: ' + process.pid)
+                    # option = input("Delete File? (Y/N)")
+                    if (option == "yes"):
+                        # Find file path
+                        print(  
+                            f'The location of the file is: {Process_path(int(process.pid))}')
+                        # Delete file at that file path
+                        try:
+                            os.remove(Process_path(int(process.pid)))
+                            showinfo(root, 'Deleted ' + process.name)
+                        except FileNotFoundError:
+                            print("Error finding file")
+                            showerror(
+                                root, 'There is some error deleting the file, recommending manual deletion after ending the process.')
+                        keyloggerDetected += 1
+                    elif (option == "no"):
+                        # Remove process
+                        removeKeylogger(process.pid)
+                        showinfo(root, 'Keylogger killed')
+                        keyloggerDetected += 1
     if keyloggerDetected == 0:
         print("No keylogger was detected.")
         showinfo(root, message="No keylogger was detected.")
