@@ -682,16 +682,16 @@ def portMonitor():
 # Main GUI
 root = tk.Tk()
 root.title('Anti Keylogger')
-root.geometry('700x500')
+root.geometry('700x100')
 btnRetrieveProcesses = tk.Button(
-    root, text="Retrieve Processes", command=retrieveProcessList).place(x=50, y=450)
+    root, text="Retrieve Processes", command=retrieveProcessList).place(x=50, y=50)
 btnScanFile = tk.Button(root, text="Scan File",
-                        command=scanFileWin).place(x=200, y=450)
+                        command=scanFileWin).place(x=200, y=50)
 btnScanSignature = tk.Button(
-    root, text="Scan File Signature", command=scanSignatureWinFun).place(x=300, y=450)
+    root, text="Scan File Signature", command=scanSignatureWinFun).place(x=300, y=50)
 btnProcMon = tk.Button(root, text="Process Monitor",
-                       command=procMonWin).place(x=450, y=450)
+                       command=procMonWin).place(x=450, y=50)
 btnPortMon = Button(root, text="Port Monitor",
                     command=portMonWinFun)
-btnPortMon.place(x=600, y=450)
+btnPortMon.place(x=600, y=50)
 root.mainloop()
