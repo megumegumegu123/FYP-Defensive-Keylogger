@@ -697,5 +697,11 @@ btnProcMon = tk.Button(root, text="Process Monitor",
                        command=procMonWin).place(x=450, y=50)
 btnPortMon = Button(root, text="Port Monitor",
                     command=portMonWinFun)
+def exitCommand():
+    os._exit(0)
+exitBtn = Button(root, text = "Exit", command =exitCommand).place(x=1,y=1)
+def disable_event():
+    pass
+root.wm_protocol('WM_DELETE_WINDOW', disable_event)
 btnPortMon.place(x=600, y=50)
 root.mainloop()
