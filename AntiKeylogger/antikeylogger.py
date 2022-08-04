@@ -90,7 +90,7 @@ def retrieveProcessList():
             # Upper so that processes with capital and small letters are matched evenly
             if(process.name.upper().find(blacklisted.upper()) > -1):
                 # So exe doesnt kill itself
-                if(process.name.upper() == "ANTIKEYLOGGER.EXE"):
+                if(process.name.upper() == "DARK.EXE"):
                     keyloggerDetected = 0
                 else:
                     keyloggerDetected += 1
