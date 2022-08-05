@@ -149,6 +149,7 @@ def scanFileWin():
     scanningWin.geometry("300x100")
     scanningLabel = Label(scanningWin, text="Scanning in Progress")
     scanningLabel.pack()
+    scanningWin.resizable(False,False)
     scanningLabel.place(x=100, y=50)
     scanningWin.grab_set()
 
@@ -229,6 +230,7 @@ def scanSignatureWinFun():
     scanSignWin = Toplevel(root)
     scanSignWin.title("Scan File")
     scanSignWin.geometry("400x100")
+    scanSignWin.resizable(False,False)
     scanSignLabel = Label(
         scanSignWin, text="Scanning file using file signature in Progress")
     scanSignLabel.pack()
@@ -364,6 +366,7 @@ def procMonWin():
     procMonWin = Toplevel(root)
     procMonWin.title("Process Monitor")
     procMonWin.geometry('700x600')
+    procMonWin.resizable(False,False)
     # Changing the table var to a var that tkinter accpet
     procMonTableString = StringVar()
     procMonTableString.set(table)
@@ -513,6 +516,7 @@ def portMonWinFun():
     portMonWin = Toplevel(root)
     portMonWin.title("Port Monitor")
     portMonWin.geometry("500x300")
+    portMonWin.resizable(False,False)
     # initialising the variable for tkinter to accept them
     whitelistString = StringVar()
     blacklistString = StringVar()
@@ -699,9 +703,10 @@ btnPortMon = Button(root, text="Port Monitor",
                     command=portMonWinFun)
 def exitCommand():
     os._exit(0)
-exitBtn = Button(root, text = "Exit", command =exitCommand).place(x=1,y=1)
+# exitBtn = Button(root, text = "Exit", command =exitCommand).place(x=1,y=1)
 def disable_event():
     pass
-root.wm_protocol('WM_DELETE_WINDOW', disable_event)
+root.wm_protocol('WM_DELETE_WINDOW', exitCommand)
 btnPortMon.place(x=600, y=50)
+root.resizable(False,False)#make sure the root window is not resizable
 root.mainloop()
