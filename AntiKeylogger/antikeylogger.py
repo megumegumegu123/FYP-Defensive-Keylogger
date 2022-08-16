@@ -63,7 +63,6 @@ def removeKeylogger(pid):
     # 9 because it represents termination https://en.wikipedia.org/wiki/Signal_(IPC)
     os.kill(int(pid), 9)
 
-
 # Function to retrieve processes
 def retrieveProcessList():
     processList = []
@@ -102,23 +101,28 @@ def retrieveProcessList():
                     # option = input("Delete File? (Y/N)")
                     if (option == "yes"):
                         # Find file path
+                        loc = Process_path(int(process.pid))
                         print(  
-                            f'The location of the file is: {Process_path(int(process.pid))}')
+                            f'The location of the file is: {loc}')
                         # Delete file at that file path
                         try:
-                            os.remove(Process_path(int(process.pid)))
+                            os.remove(loc)
                             showinfo(root, 'Deleted ' + process.name)
+                            keyloggerDetected -= 1
                         except FileNotFoundError:
                             print("Error finding file")
                             showerror(
                                 root, 'There is some error deleting the file, recommending manual deletion after ending the process.')
-                        keyloggerDetected += 1
+                        except PermissionError:
+                            print("Please run the program as administrator")
+                            showerror(
+                                root, 'Error with permissions. Try running the program as administrator or escalating the permissions of the software.')
                     elif (option == "no"):
                         # Remove process
                         removeKeylogger(process.pid)
                         showinfo(root, 'Keylogger killed')
-                        keyloggerDetected += 1
-    if keyloggerDetected == 0:
+                        keyloggerDetected -= 1
+    if keyloggerDetected <= 0:
         print("No keylogger was detected.")
         showinfo(root, message="No keylogger was detected.")
 
